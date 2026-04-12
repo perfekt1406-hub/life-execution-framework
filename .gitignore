@@ -1,9 +1,32 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
 out/
+build/icons/*.icns
+build/icons/*.ico
+build/icons/*.png
+
+# Electron-builder artifacts
 *.AppImage
 *.deb
 *.dmg
 *.exe
 *.snap
 *.rpm
+*.zip
+*.blockmap
+*.tar.gz
+
+# Logs
+npm-debug.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

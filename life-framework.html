@@ -444,8 +444,35 @@
   .dot5 { background: #c26b5a; }
   .dot6 { background: #bf9f5a; }
 
+  /* ── Frameless window chrome ── */
+  .titlebar {
+    -webkit-app-region: drag;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 32px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 10px;
+    gap: 6px;
+  }
+  .titlebar-btn {
+    -webkit-app-region: no-drag;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .titlebar-btn.close   { background: #ff5f57; }
+  .titlebar-btn.min     { background: #febc2e; }
+  .titlebar-btn.max     { background: #28c840; }
+  .titlebar-btn:hover { filter: brightness(0.85); }
+  .sidebar { padding-top: 2.5rem; }
+  .main { padding-top: 32px; }
+
   @media (max-width: 780px) {
-    .sidebar { display: none; }
     .phase-section { padding: 2rem 1.25rem 3rem; }
     .two-col { grid-template-columns: 1fr; }
     .phase-title { font-size: 26px; }
@@ -453,6 +480,11 @@
 </style>
 </head>
 <body>
+<div class="titlebar">
+  <button class="titlebar-btn min"   onclick="window.windowControls.minimize()" title="Minimise"></button>
+  <button class="titlebar-btn max"   onclick="window.windowControls.maximize()" title="Maximise"></button>
+  <button class="titlebar-btn close" onclick="window.windowControls.close()"    title="Close"></button>
+</div>
 <div class="app">
 
 <!-- ── Sidebar ── -->

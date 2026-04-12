@@ -17,18 +17,27 @@
       "main.js",
       "preload.js",
       "life-framework.html",
-      "package.json"
+      "package.json",
+      "build/icons/*"
     ],
+    "icon": "build/icons/icon",
     "linux": {
       "target": ["AppImage", "deb"],
-      "category": "Utility"
+      "category": "Utility",
+      "maintainer": "Life Framework <noreply@life-framework.local>",
+      "icon": "build/icons/icon.png"
     },
     "mac": {
       "target": ["dmg"],
-      "category": "public.app-category.lifestyle"
+      "category": "public.app-category.lifestyle",
+      "icon": "build/icons/icon.icns"
     },
     "win": {
-      "target": ["nsis"]
+      "icon": "build/icons/icon.ico",
+      "target": [
+        { "target": "nsis",  "arch": ["x64"] },
+        { "target": "zip",   "arch": ["x64"] }
+      ]
     }
   },
   "dependencies": {

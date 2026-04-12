@@ -1,6 +1,6 @@
 delete process.env.ELECTRON_RUN_AS_NODE;
 
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -44,6 +44,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 860,
+    frame: false,
     title: 'Life Execution Framework',
     backgroundColor: '#0e0e0e',
     webPreferences: {
@@ -55,6 +56,10 @@ function createWindow() {
 
   mainWindow.loadFile('life-framework.html');
   stampToday();
+
+  ipcMain.on('window-close',    () => mainWindow && mainWindow.close());
+  ipcMain.on('window-minimize', () => mainWindow && mainWindow.minimize());
+  ipcMain.on('window-maximize', () => mainWindow && (mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()));
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -81,6 +86,7 @@ function setupAutoLaunch() {
 }
 
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
   if (isAutoStart && wasOpenedToday()) {
     app.quit();
     return;

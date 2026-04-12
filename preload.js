@@ -1,2 +1,7 @@
-// Intentionally minimal — the renderer uses only browser APIs (localStorage, DOM).
-// This file exists so contextIsolation has a proper preload entry point.
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('windowControls', {
+  close:    () => ipcRenderer.send('window-close'),
+  minimize: () => ipcRenderer.send('window-minimize'),
+  maximize: () => ipcRenderer.send('window-maximize'),
+});
