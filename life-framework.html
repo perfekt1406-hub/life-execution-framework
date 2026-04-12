@@ -15,13 +15,13 @@
     --text: #e8e4dc;
     --muted: #7a7570;
     --muted2: #9e9890;
-    --accent: #c8b97a;
-    --accent2: #a89654;
+    --accent: #c42b2b;
+    --accent2: #9e2020;
     --danger: #c26b5a;
     --success: #6b9e7a;
     --info: #6a8fbf;
     --warn: #bf9f5a;
-    --phase-colors: #c8b97a, #6a8fbf, #6b9e7a, #c26b5a, #9b7ac8, #bf9f5a;
+    --phase-colors: #d4914a, #6a8fbf, #6b9e7a, #c26b5a, #9b7ac8, #bf9f5a;
     --serif: 'DM Serif Display', Georgia, serif;
     --mono: 'DM Mono', monospace;
     --sans: 'DM Sans', sans-serif;
@@ -419,25 +419,25 @@
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
 
   /* ── Phase colors ── */
-  .pc1 { color: #c8b97a; }
+  .pc1 { color: #d4914a; }
   .pc2 { color: #6a8fbf; }
   .pc3 { color: #6b9e7a; }
   .pc4 { color: #9b7ac8; }
   .pc5 { color: #c26b5a; }
   .pc6 { color: #bf9f5a; }
-  .pb1 { border-left-color: #c8b97a; }
+  .pb1 { border-left-color: #d4914a; }
   .pb2 { border-left-color: #6a8fbf; }
   .pb3 { border-left-color: #6b9e7a; }
   .pb4 { border-left-color: #9b7ac8; }
   .pb5 { border-left-color: #c26b5a; }
   .pb6 { border-left-color: #bf9f5a; }
-  .pbadge1 { color: #c8b97a; background: rgba(200,185,122,.1); border-color: rgba(200,185,122,.3); }
+  .pbadge1 { color: #d4914a; background: rgba(212,145,74,.1); border-color: rgba(212,145,74,.3); }
   .pbadge2 { color: #6a8fbf; background: rgba(106,143,191,.1); border-color: rgba(106,143,191,.3); }
   .pbadge3 { color: #6b9e7a; background: rgba(107,158,122,.1); border-color: rgba(107,158,122,.3); }
   .pbadge4 { color: #9b7ac8; background: rgba(155,122,200,.1); border-color: rgba(155,122,200,.3); }
   .pbadge5 { color: #c26b5a; background: rgba(194,107, 90,.1); border-color: rgba(194,107, 90,.3); }
   .pbadge6 { color: #bf9f5a; background: rgba(191,159, 90,.1); border-color: rgba(191,159, 90,.3); }
-  .dot1 { background: #c8b97a; }
+  .dot1 { background: #d4914a; }
   .dot2 { background: #6a8fbf; }
   .dot3 { background: #6b9e7a; }
   .dot4 { background: #9b7ac8; }
@@ -472,6 +472,117 @@
   .sidebar { padding-top: 2.5rem; }
   .main { padding-top: 32px; }
 
+  /* ── Autostart toggle ── */
+  .autostart-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .autostart-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    user-select: none;
+  }
+  .toggle-track {
+    width: 34px; height: 18px;
+    background: var(--border2);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s ease-out;
+    contain: layout style;
+  }
+  .toggle-track.on { background: var(--accent); }
+  .toggle-track[data-busy="1"] { opacity: 0.85; pointer-events: none; }
+  .toggle-knob {
+    width: 14px; height: 14px;
+    background: var(--text);
+    border-radius: 50%;
+    position: absolute;
+    top: 2px; left: 2px;
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+  .toggle-track.on .toggle-knob { transform: translate3d(16px, 0, 0); }
+  @media (prefers-reduced-motion: reduce) {
+    .toggle-track, .toggle-knob { transition: none; }
+  }
+
+  /* ── First-run modal ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    max-width: 420px;
+    width: 90%;
+    padding: 2rem;
+    text-align: center;
+  }
+  .modal-icon {
+    font-size: 28px;
+    margin-bottom: 1rem;
+  }
+  .modal-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: .5rem;
+  }
+  .modal-desc {
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .modal-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 1.75rem;
+  }
+  .modal-toggle-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    user-select: none;
+  }
+  .modal-btn {
+    background: var(--accent2);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 10px 28px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .modal-btn:hover { background: var(--accent); }
+
   @media (max-width: 780px) {
     .phase-section { padding: 2rem 1.25rem 3rem; }
     .two-col { grid-template-columns: 1fr; }
@@ -485,6 +596,21 @@
   <button class="titlebar-btn max"   onclick="window.windowControls.maximize()" title="Maximise"></button>
   <button class="titlebar-btn close" onclick="window.windowControls.close()"    title="Close"></button>
 </div>
+<div id="welcome-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-icon">⚙</div>
+    <div class="modal-title">You showed up.</div>
+    <div class="modal-desc">Open this workbook automatically once a day when you log in<br>You can change this any time from the sidebar.</div>
+    <div class="modal-toggle-row">
+      <span class="modal-toggle-label">Daily auto-open</span>
+      <div id="modal-toggle" class="toggle-track on" onclick="toggleModalAutostart()">
+        <div class="toggle-knob"></div>
+      </div>
+    </div>
+    <button class="modal-btn" onclick="confirmSetup()">Let's go</button>
+  </div>
+</div>
+
 <div class="app">
 
 <!-- ── Sidebar ── -->
@@ -492,6 +618,12 @@
   <div class="sidebar-brand">
     <div class="brand-label">No excuses. No shortcuts.</div>
     <div class="brand-title">Life Execution<br>Framework</div>
+  </div>
+  <div class="autostart-row">
+    <span class="autostart-label">Auto-open daily</span>
+    <div id="sidebar-toggle" class="toggle-track" onclick="toggleSidebarAutostart()">
+      <div class="toggle-knob"></div>
+    </div>
   </div>
   <div class="nav-section-label">Phases</div>
   <div class="nav-item active" onclick="goToSection('phase0')" style="border-left-color:var(--border2)">
@@ -1601,12 +1733,64 @@ function goToSection(id) {
   document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// ── Autostart UI ──
+let modalWantsAutostart = true;
+/** Bumps when user toggles — stale getAutoStart() results are ignored */
+let autostartGen = 0;
+
+function toggleModalAutostart() {
+  modalWantsAutostart = !modalWantsAutostart;
+  document.getElementById('modal-toggle').classList.toggle('on', modalWantsAutostart);
+}
+
+async function confirmSetup() {
+  if (window.appControls) {
+    await window.appControls.setAutoStart(modalWantsAutostart);
+    await window.appControls.finishSetup();
+  }
+  document.getElementById('welcome-modal').classList.add('hidden');
+  autostartGen++;
+  await syncSidebarToggle();
+}
+
+async function toggleSidebarAutostart() {
+  const track = document.getElementById('sidebar-toggle');
+  if (track.dataset.busy === '1') return;
+  autostartGen++;
+  const newState = !track.classList.contains('on');
+  track.classList.toggle('on', newState);
+  if (!window.appControls) return;
+  track.dataset.busy = '1';
+  try {
+    const ok = await window.appControls.setAutoStart(newState);
+    if (!ok) track.classList.toggle('on', !newState);
+  } finally {
+    delete track.dataset.busy;
+  }
+}
+
+async function syncSidebarToggle() {
+  if (!window.appControls) return;
+  const g = autostartGen;
+  const on = await window.appControls.getAutoStart();
+  if (g !== autostartGen) return;
+  document.getElementById('sidebar-toggle').classList.toggle('on', on);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   loadAll();
   updateProgress();
   document.querySelectorAll('input[type=text], textarea').forEach(el => {
     el.addEventListener('input', saveAll);
   });
+
+  if (window.appControls) {
+    const firstRun = await window.appControls.isFirstRun();
+    if (firstRun) {
+      document.getElementById('welcome-modal').classList.remove('hidden');
+    }
+    await syncSidebarToggle();
+  }
 });
 
 const sections = document.querySelectorAll('.phase-section');
