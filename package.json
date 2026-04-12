@@ -1,0 +1,43 @@
+{
+  "name": "life-execution-framework",
+  "version": "1.0.0",
+  "description": "A brutally honest life execution workbook — Electron desktop app",
+  "main": "main.js",
+  "scripts": {
+    "start": "unset ELECTRON_RUN_AS_NODE && electron --no-sandbox .",
+    "dist": "electron-builder",
+    "dist:linux": "electron-builder --linux",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.life-framework.app",
+    "productName": "Life Execution Framework",
+    "files": [
+      "main.js",
+      "preload.js",
+      "life-framework.html",
+      "package.json"
+    ],
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.lifestyle"
+    },
+    "win": {
+      "target": ["nsis"]
+    }
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

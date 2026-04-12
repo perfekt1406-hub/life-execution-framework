@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Execution Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --bg2: #161616;
+    --bg3: #1f1f1f;
+    --border: #2a2a2a;
+    --border2: #363636;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --muted2: #9e9890;
+    --accent: #c8b97a;
+    --accent2: #a89654;
+    --danger: #c26b5a;
+    --success: #6b9e7a;
+    --info: #6a8fbf;
+    --warn: #bf9f5a;
+    --phase-colors: #c8b97a, #6a8fbf, #6b9e7a, #c26b5a, #9b7ac8, #bf9f5a;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .app { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-brand {
+    padding: 0 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .brand-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .brand-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--accent);
+    line-height: 1.2;
+    font-style: italic;
+  }
+  .nav-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0 1.5rem;
+    margin-bottom: .75rem;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 1.5rem;
+    cursor: pointer;
+    transition: background .15s;
+    border-left: 2px solid transparent;
+    color: var(--muted2);
+    font-size: 13px;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--bg3); color: var(--text); border-left-color: var(--accent); }
+  .nav-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    flex-shrink: 0; opacity: .5;
+    transition: opacity .15s;
+  }
+  .nav-item.active .nav-dot { opacity: 1; }
+  .nav-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .1em;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .progress-bar {
+    background: var(--border);
+    border-radius: 10px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 10px;
+    transition: width .4s ease;
+    width: 0%;
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; min-width: 0; }
+  .phase-section {
+    padding: 3.5rem 3rem 4rem;
+    border-bottom: 1px solid var(--border);
+    max-width: 860px;
+  }
+  .phase-section:last-child { border-bottom: none; }
+
+  /* ── Phase header ── */
+  .phase-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+  }
+  .phase-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    text-transform: uppercase;
+  }
+  .phase-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .phase-number {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .1em;
+  }
+  .phase-title {
+    font-family: var(--serif);
+    font-size: 36px;
+    line-height: 1.15;
+    margin-bottom: .75rem;
+  }
+  .phase-subtitle {
+    font-size: 15px;
+    color: var(--muted2);
+    line-height: 1.75;
+    max-width: 620px;
+    margin-bottom: 2.5rem;
+    border-left: 2px solid var(--border2);
+    padding-left: 1rem;
+  }
+
+  /* ── Cards ── */
+  .cards-grid { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color .15s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-header {
+    padding: 1.1rem 1.25rem .75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .card-icon {
+    width: 28px; height: 28px;
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-family: var(--mono);
+    font-weight: 500;
+  }
+  .card-meta { flex: 1; min-width: 0; }
+  .card-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .card-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.35; }
+  .card-body {
+    padding: 0 1.25rem .9rem 1.25rem;
+    font-size: 13.5px;
+    color: var(--muted2);
+    line-height: 1.75;
+  }
+  .card-body strong { color: var(--text); font-weight: 500; }
+  .card-body em { color: var(--accent); font-style: normal; font-family: var(--mono); font-size: 12px; }
+  .card-divider { border: none; border-top: 1px solid var(--border); margin: 0 1.25rem .9rem; }
+
+  /* ── Tag types ── */
+  .t-logic  { color: var(--info);    background: rgba(106,143,191,.12); }
+  .t-psy    { color: var(--warn);    background: rgba(191,159, 90,.12); }
+  .t-warn   { color: var(--danger);  background: rgba(194,107, 90,.12); }
+  .t-tool   { color: var(--success); background: rgba(107,158,122,.12); }
+  .t-deep   { color: #9b7ac8;        background: rgba(155,122,200,.12); }
+
+  .badge { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
+  .b-logic  { color: var(--info);    background: rgba(106,143,191,.15); border: 1px solid rgba(106,143,191,.3); }
+  .b-psy    { color: var(--warn);    background: rgba(191,159, 90,.15); border: 1px solid rgba(191,159, 90,.3); }
+  .b-warn   { color: var(--danger);  background: rgba(194,107, 90,.15); border: 1px solid rgba(194,107, 90,.3); }
+  .b-tool   { color: var(--success); background: rgba(107,158,122,.15); border: 1px solid rgba(107,158,122,.3); }
+  .b-deep   { color: #9b7ac8;        background: rgba(155,122,200,.15); border: 1px solid rgba(155,122,200,.3); }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; margin-top: .75rem; }
+  .checklist-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.5;
+    cursor: pointer;
+    transition: color .1s;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li:hover { color: var(--text); }
+  .checklist li.done { text-decoration: line-through; opacity: .45; }
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .checklist li.done .check-box {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .check-tick { display: none; width: 9px; height: 9px; }
+  .check-tick path { stroke: var(--bg); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .checklist li.done .check-tick { display: block; }
+
+  /* ── Textarea / inputs ── */
+  .field-block { margin-top: .9rem; }
+  .field-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  textarea, input[type=text] {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    padding: 10px 12px;
+    outline: none;
+    resize: vertical;
+    transition: border-color .15s;
+  }
+  textarea:focus, input[type=text]:focus { border-color: var(--accent2); }
+  textarea::placeholder, input[type=text]::placeholder { color: var(--muted); }
+
+  /* ── Two-col ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── Insight block ── */
+  .insight {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.1rem;
+    margin: .75rem 0;
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.7;
+  }
+  .insight strong { color: var(--accent); font-weight: 500; }
+
+  .callout {
+    display: flex;
+    gap: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .9rem 1rem;
+    margin: .75rem 0;
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.65;
+  }
+  .callout-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+  .callout strong { color: var(--text); font-weight: 500; }
+
+  /* ── Section heading ── */
+  .section-h {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Formula block ── */
+  .formula {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--accent);
+    margin: .75rem 0;
+    line-height: 1.9;
+  }
+  .formula .comment { color: var(--muted); font-style: italic; }
+
+  /* ── Example block ── */
+  .example {
+    background: rgba(106,143,191,.06);
+    border: 1px solid rgba(106,143,191,.2);
+    border-radius: var(--radius);
+    padding: .9rem 1rem;
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.7;
+    margin: .75rem 0;
+  }
+  .example-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--info);
+    margin-bottom: 5px;
+  }
+  .example strong { color: var(--text); font-weight: 500; }
+
+  /* ── Metric table ── */
+  .metric-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-key { color: var(--muted2); }
+  .metric-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+
+  /* ── Phase colors ── */
+  .pc1 { color: #c8b97a; }
+  .pc2 { color: #6a8fbf; }
+  .pc3 { color: #6b9e7a; }
+  .pc4 { color: #9b7ac8; }
+  .pc5 { color: #c26b5a; }
+  .pc6 { color: #bf9f5a; }
+  .pb1 { border-left-color: #c8b97a; }
+  .pb2 { border-left-color: #6a8fbf; }
+  .pb3 { border-left-color: #6b9e7a; }
+  .pb4 { border-left-color: #9b7ac8; }
+  .pb5 { border-left-color: #c26b5a; }
+  .pb6 { border-left-color: #bf9f5a; }
+  .pbadge1 { color: #c8b97a; background: rgba(200,185,122,.1); border-color: rgba(200,185,122,.3); }
+  .pbadge2 { color: #6a8fbf; background: rgba(106,143,191,.1); border-color: rgba(106,143,191,.3); }
+  .pbadge3 { color: #6b9e7a; background: rgba(107,158,122,.1); border-color: rgba(107,158,122,.3); }
+  .pbadge4 { color: #9b7ac8; background: rgba(155,122,200,.1); border-color: rgba(155,122,200,.3); }
+  .pbadge5 { color: #c26b5a; background: rgba(194,107, 90,.1); border-color: rgba(194,107, 90,.3); }
+  .pbadge6 { color: #bf9f5a; background: rgba(191,159, 90,.1); border-color: rgba(191,159, 90,.3); }
+  .dot1 { background: #c8b97a; }
+  .dot2 { background: #6a8fbf; }
+  .dot3 { background: #6b9e7a; }
+  .dot4 { background: #9b7ac8; }
+  .dot5 { background: #c26b5a; }
+  .dot6 { background: #bf9f5a; }
+
+  @media (max-width: 780px) {
+    .sidebar { display: none; }
+    .phase-section { padding: 2rem 1.25rem 3rem; }
+    .two-col { grid-template-columns: 1fr; }
+    .phase-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-label">No excuses. No shortcuts.</div>
+    <div class="brand-title">Life Execution<br>Framework</div>
+  </div>
+  <div class="nav-section-label">Phases</div>
+  <div class="nav-item active" onclick="goToSection('phase0')" style="border-left-color:var(--border2)">
+    <span class="nav-dot" style="background:var(--muted2)"></span> Discipline
+    <span class="nav-num">00</span>
+  </div>
+  <div class="nav-item" onclick="goToSection('phase1')">
+    <span class="nav-dot dot1"></span> Clarity
+    <span class="nav-num">01</span>
+  </div>
+  <div class="nav-item" onclick="goToSection('phase2')">
+    <span class="nav-dot dot2"></span> Constraints
+    <span class="nav-num">02</span>
+  </div>
+  <div class="nav-item" onclick="goToSection('phase3')">
+    <span class="nav-dot dot3"></span> Leverage
+    <span class="nav-num">03</span>
+  </div>
+  <div class="nav-item" onclick="goToSection('phase4')">
+    <span class="nav-dot dot4"></span> System
+    <span class="nav-num">04</span>
+  </div>
+  <div class="nav-item" onclick="goToSection('phase5')">
+    <span class="nav-dot dot5"></span> Measure
+    <span class="nav-num">05</span>
+  </div>
+  <div class="nav-item" onclick="goToSection('phase6')">
+    <span class="nav-dot dot6"></span> Iterate
+    <span class="nav-num">06</span>
+  </div>
+  <div class="sidebar-footer">
+    <div class="progress-label">
+      <span>Overall progress</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="prog-bar"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<main class="main">
+
+<!-- ======= PHASE 0: DISCIPLINE ======= -->
+<section class="phase-section" id="phase0">
+  <div class="phase-eyebrow">
+    <span class="phase-badge pbadge1" style="color:#e8e4dc;background:rgba(232,228,220,.08);border-color:rgba(232,228,220,.2)">Phase 00</span>
+    <div class="phase-line"></div>
+    <span class="phase-number" style="color:var(--muted2)">Prerequisite</span>
+  </div>
+  <h1 class="phase-title" style="color:var(--text)">Stop reading. Start doing. Or leave.</h1>
+  <p class="phase-subtitle">Everything past this point is worthless if you don't execute. You don't have a knowledge problem — you have an action problem. This section exists because you've been lying to yourself about why you haven't started. That ends now.</p>
+
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-warn">≠</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--danger)">Misconception</div>
+          <div class="card-title">You're not "undisciplined." You're untrained.</div>
+        </div>
+        <span class="badge b-warn">Read first</span>
+      </div>
+      <div class="card-body">
+        You tell yourself you "lack discipline" like it's a genetic condition. That's a convenient lie. It lets you off the hook. Discipline isn't something you're born with — it's something you forge through pain and repetition, like calluses on your hands.
+        <div class="insight" style="border-left-color:var(--danger)">
+          Discipline is doing what you said you'd do when every fiber of your being screams to quit. It's a muscle. It atrophies when you baby it. It grows when you brutalize it. Nobody walked out of the womb with it — they built it one agonizing rep at a time.
+        </div>
+        Here's the truth: every time you follow through on a promise to yourself when it hurts, you cast a vote for the person you want to become. Every time you fold, you vote for the person you're trying to leave behind. <strong>You are building or destroying yourself with every single decision.</strong>
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div>You don't need to be disciplined to start. You need one follow-through. One. Then stack another on top. That's how you claw your way out of mediocrity — one ugly, uncomfortable rep at a time.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">Δ</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">You know what to do. You're choosing not to.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        You already know what you need to do. Wake up early. Train. Eat clean. Do the hard thing first. Stop wasting hours on your phone. You don't need another book, another podcast, another course. <strong>The gap between where you are and where you want to be is not information — it's the war between your comfort and your potential.</strong>
+        <div class="formula">
+          <span class="comment">// What's really happening when you "can't make yourself do it"</span><br>
+          You're choosing short-term comfort over long-term greatness.<br>
+          Your future self is a stranger you keep betraying.<br>
+          Starting feels like death — but it never is. Never.<br>
+          Your brain overestimates the pain and underestimates what's on the other side.
+        </div>
+        <div class="example">
+          <div class="example-label">Understand this, then move on</div>
+          Your brain is wired for survival, not for building an extraordinary life. Procrastination and comfort-seeking are ancient software running on a modern battlefield. You're not broken — but you ARE losing the war against your own wiring every time you obey the impulse to quit. The fix is brutal override. Not understanding. Not journaling about your feelings. <strong>Override.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">⚙</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">Progressive overload for the mind — how you actually build this</div>
+        </div>
+        <span class="badge b-logic">Actionable</span>
+      </div>
+      <div class="card-body">
+        Same principle that builds a stronger body builds a stronger mind. You don't walk into the gym day one and deadlift 500 pounds. You start with weight that challenges you, you survive it, and you add more. But here's the key — <strong>you show up every single day regardless.</strong>
+        <div class="formula">
+          <span class="comment">// The discipline build protocol — no days off</span><br>
+          Week 1–2:  Pick ONE commitment. Make it small enough that<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you have ZERO excuse not to do it.<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10 min. 1 page. 1 set. Every. Single. Day.<br><br>
+          Week 3–4:  Add weight. Stack a second commitment.<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Still never miss. Consistency destroys talent.<br><br>
+          Month 2+:  You've got proof now. You've got momentum.<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now go to war. Expand hard.
+        </div>
+        <div class="insight" style="border-left-color:var(--info)">
+          <strong>Never miss twice. Ever.</strong> One miss is a stumble. Two misses is a surrender. This is the one rule that holds the entire framework together. Miss once, fine — get back up swinging. But if you let that become two, then three, you're done. That's how every person who "almost made it" died inside. Don't be that person.
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My non-negotiable daily commitment — starts today, not Monday</div>
+        <input type="text" placeholder="e.g. 50 pushups before I touch my phone. Every morning. No exceptions.">
+        <div class="field-label" style="margin-top:.75rem">How long before I add more weight</div>
+        <input type="text" placeholder="e.g. 14 days with zero misses — then I double it">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">◑</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">You're addicted to comfort. That's what's killing you.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        What's stopping you is not ability. It's not time. It's not resources. It's your pathological need to feel comfortable before you act. You're terrified of starting, of being bad, of looking stupid, of failing in public. <strong>Every person you admire learned to eat that fear for breakfast and get to work anyway.</strong>
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div>Discomfort is not the enemy — it's the compass. If it doesn't hurt, it's not changing you. That resistance you feel before hard work? That's the door to everything you want. Walk through it. Every single time. It doesn't get easier — you get harder.</div>
+        </div>
+        <div class="example">
+          <div class="example-label">The only reframe you need</div>
+          Kill this thought: <strong>"I don't feel like doing this."</strong><br>
+          Replace it with: <strong>"I don't feel like it. Good. Now I know it matters. I'm doing it anyway."</strong><br><br>
+          Feelings are not commands. They are noise. The moment you stop obeying every emotion that tells you to quit, sit down, or wait — that's the moment your life actually changes. Discipline is not the absence of resistance. It's refusing to kneel to it.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-warn">✕</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--danger)">Watch out</div>
+          <div class="card-title">The lies you tell yourself — call them out or they'll own you</div>
+        </div>
+      </div>
+      <div class="card-body">
+        These are the specific ways you sabotage yourself. You've been running these patterns for years. Name them now so you can destroy them on sight.
+        <div style="margin: .75rem 0;">
+          <div class="metric-row"><span class="metric-key">"If I can't do it perfectly, I won't do it at all"</span><span class="metric-val" style="color:var(--danger)">Coward's exit</span></div>
+          <div class="metric-row"><span class="metric-key">"I'll start Monday / next month / January"</span><span class="metric-val" style="color:var(--danger)">You won't. You never do.</span></div>
+          <div class="metric-row"><span class="metric-key">Planning, researching, organizing instead of doing</span><span class="metric-val" style="color:var(--danger)">Productive procrastination</span></div>
+          <div class="metric-row"><span class="metric-key">"I'm not ready yet"</span><span class="metric-val" style="color:var(--danger)">You'll never be. Go now.</span></div>
+          <div class="metric-row"><span class="metric-key">Comparing yourself to people 10 years ahead</span><span class="metric-val" style="color:var(--danger)">Excuse factory</span></div>
+          <div class="metric-row"><span class="metric-key">Beating yourself up and calling it "accountability"</span><span class="metric-val" style="color:var(--danger)">Suffering ≠ progress</span></div>
+        </div>
+        <div class="insight" style="border-left-color:var(--danger)">
+          <strong>On self-destruction vs. self-correction:</strong> There's a difference between holding yourself accountable and beating yourself into the ground. Wallowing in guilt after a failure isn't discipline — it's self-indulgence disguised as toughness. Real accountability is cold: note what happened, extract the lesson, adjust, execute. No drama. No pity party. Move.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-tool">✓</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--success)">Prerequisite checklist</div>
+          <div class="card-title">Don't move forward until you can check every one of these</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1.25rem;">
+        <ul class="checklist" id="cl0">
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I accept that discipline is built through suffering, not granted at birth</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I have a daily non-negotiable commitment locked in — starting today</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I understand that discomfort is the price of admission — I will pay it</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've identified my go-to self-sabotage pattern and I'm ready to kill it</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>The "never miss twice" rule is law. Non-negotiable. Period.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======= PHASE 1: CLARITY ======= -->
+<section class="phase-section" id="phase1">
+  <div class="phase-eyebrow">
+    <span class="phase-badge pbadge1">Phase 01</span>
+    <div class="phase-line"></div>
+    <span class="phase-number pc1">Clarity</span>
+  </div>
+  <h1 class="phase-title pc1">Get brutally honest about what you want</h1>
+  <p class="phase-subtitle">You're not lost because you lack effort. You're lost because you're chasing a vague fantasy instead of a concrete target. "I want to be successful" is not a goal — it's a wish. You can't attack a feeling. Define the target or you'll spend years running in circles and wondering why nothing changes.</p>
+
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">fx</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">The 5-Why drill — stop lying about what you really want</div>
+        </div>
+        <span class="badge b-logic">Core</span>
+      </div>
+      <div class="card-body">
+        The goal you think you want is almost never the real goal. It's a surface-level proxy for something deeper you haven't had the guts to confront. Write your goal down. Then ask "why do I actually want this?" five times. Don't stop until it hurts. The answer at the bottom is the real target.
+        <div class="insight">
+          <strong>Why this matters:</strong> If you're grinding toward the wrong thing, all that discipline is wasted. You'll arrive at the top of the ladder and realize it was leaning against the wrong wall. Someone chasing a promotion often just wants respect — and there are 10 faster ways to earn that.
+        </div>
+        <div class="example">
+          <div class="example-label">Example — dig until it bleeds</div>
+          <strong>"I want to make more money"</strong> → Why? "To feel secure" → Why? "Because I'm terrified of losing control" → Why? "I grew up watching my family drown in financial chaos" → Why does that drive me now? "Because I equate money with safety and freedom."<br><br>
+          Real goal: <strong>autonomy and safety.</strong> Now you can stop chasing a salary bump and start asking the real question: what's the fastest, most aggressive path to genuine financial freedom?
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">Your goal, then drill down (5 whys)</div>
+        <textarea rows="5" placeholder="I want to... &#10;Why? Because... &#10;Why? Because... &#10;Why? Because... &#10;Why? Because..."></textarea>
+        <div class="field-label" style="margin-top:.75rem">My actual underlying goal is:</div>
+        <input type="text" placeholder="The real thing I'm solving for...">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">01</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">Make it pass/fail. No participation trophies.</div>
+        </div>
+        <span class="badge b-logic">Core</span>
+      </div>
+      <div class="card-body">
+        Your goal either passes the <strong>yes/no test</strong> or it's garbage. On a specific date, you either hit it or you didn't. There is no "kind of." There is no partial credit. Vague goals produce vague effort, and vague effort produces nothing.
+        <div class="formula">
+          <span class="comment">// Goal structure — be surgical</span><br>
+          [Specific outcome] + [Measurable threshold] + [Hard deadline]<br><br>
+          <span class="comment">// Examples that pass the test</span><br>
+          "Run 5km without stopping by Oct 1st, 2025"<br>
+          "$5,000/month revenue by Dec 31st, 2025"<br>
+          "Read 24 books by Dec 31st, 2025"<br>
+          "Save $12,000 by March 1st, 2026"
+        </div>
+        <div class="callout">
+          <div class="callout-icon">⚠</div>
+          <div><strong>You will underestimate how long this takes.</strong> Everyone does. Your optimistic timeline is a fantasy. Find people who've actually done this. Use their timeline, not yours. Then add 50% because you're not them yet.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">Write your goal in binary + time-bound format</div>
+        <input type="text" placeholder='e.g. "I will [X] by [date]"'>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-deep">◈</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:#9b7ac8">Deep work</div>
+          <div class="card-title">The 10/10/10 test — stop thinking small</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Before you commit, ask yourself: <strong>How will I feel about this in 10 minutes? In 10 months? In 10 years?</strong> Most people sacrifice the 10-year version of themselves to protect the 10-minute version. They choose comfort now and pay for it with regret forever. Stop doing that.
+        <div class="insight">
+          The research is clear: humans regret what they <em>didn't do</em> far more than what they did. You recover from failures. You never recover from the haunting knowledge that you were too scared to try.
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="two-col">
+          <div>
+            <div class="field-label">In 10 months I'll feel...</div>
+            <textarea rows="2" placeholder="About this goal..."></textarea>
+          </div>
+          <div>
+            <div class="field-label">In 10 years I'll feel...</div>
+            <textarea rows="2" placeholder="About this goal..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">≈</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">The eulogy test — are you even fighting for the right thing?</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Write five things you'd want said about you when you're dead. Now look at how you spent last week. See the gap? That gap is the distance between who you say you are and who you actually are. <strong>Most people grind their entire lives toward goals that won't even make it into their eulogy.</strong> Don't be one of them.
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div>This isn't morbid — it's a <strong>wake-up call</strong>. Without this check, you'll spend decades efficiently climbing a mountain you never cared about. That's not discipline — it's sleepwalking.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">5 things I'd want said about me</div>
+        <textarea rows="3" placeholder="1. They were... &#10;2. They always... &#10;3. They never..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-tool">✓</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--success)">Clarity checklist</div>
+          <div class="card-title">Don't move forward until every one of these is locked in</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1.25rem;">
+        <ul class="checklist" id="cl1">
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've done the 5-Why drill and confronted what I'm actually chasing</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>My goal is written in pass/fail format with a hard deadline — no wiggle room</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>The 10/10/10 test confirms this goal is worth bleeding for at every horizon</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>This goal matches what I'd want carved on my tombstone — not just my LinkedIn</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've reality-checked my timeline against people who've actually done this</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======= PHASE 2: CONSTRAINTS ======= -->
+<section class="phase-section" id="phase2">
+  <div class="phase-eyebrow">
+    <span class="phase-badge pbadge2">Phase 02</span>
+    <div class="phase-line"></div>
+    <span class="phase-number pc2">Constraints</span>
+  </div>
+  <h1 class="phase-title pc2">Stop lying about what's actually holding you back</h1>
+  <p class="phase-subtitle">There's one thing choking your progress right now. One. Not ten. And you're probably not working on it because it's the hardest one to face. You're busy optimizing things that don't matter while the real blocker sits untouched. That stops here.</p>
+
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">⊗</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">One bottleneck is strangling everything. Find it.</div>
+        </div>
+        <span class="badge b-logic">Core</span>
+      </div>
+      <div class="card-body">
+        Every system has one binding constraint — the weakest link that caps everything else. In a factory, it's the slowest machine. In your life, it's the one thing you keep avoiding. Here are the five possibilities:
+        <div class="formula">
+          <span class="comment">// The 5 constraints — be honest about which one owns you</span><br>
+          TIME      → you don't have the hours (or you're wasting them)<br>
+          MONEY     → you can't access the tools or resources<br>
+          SKILLS    → you don't know how (yet)<br>
+          NETWORK   → you don't know the right people<br>
+          ENERGY    → you're running on empty and wondering why nothing works
+        </div>
+        Test this hard: ask "if I had unlimited [X], would I hit my goal?" Go through each one until you get an honest yes. <strong>That's your bottleneck. Attack ONLY that. Everything else is you rearranging deck chairs on the Titanic.</strong>
+        <div class="insight pb2">
+          <strong>You're probably wrong about what it is.</strong> Most people blame skills when it's network. Most blame money when it's energy — they have the resources but they're too burned out, too scattered, or too undisciplined to use them. Be ruthlessly honest.
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My primary constraint is</div>
+        <input type="text" placeholder="Be specific: e.g. 'I have no network in finance' not just 'network'">
+        <div class="field-label" style="margin-top:.75rem">Evidence that this is actually the bottleneck</div>
+        <textarea rows="2" placeholder="Because even if I had [X and Y], I'd still be blocked by..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">◐</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">Pre-mortem — visualize your failure so you can kill it first</div>
+        </div>
+        <span class="badge b-psy">Critical</span>
+      </div>
+      <div class="card-body">
+        Picture this: it's 12 months from now and you failed. Completely. Not because of bad luck — because of predictable, avoidable reasons that you could see coming right now if you had the guts to look. Write down every single way you're going to sabotage this. Be savage with yourself.
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div>Weak people call this "negativity." Winners call it <strong>war planning.</strong> You don't go into battle hoping the enemy doesn't show up. You plan for every ambush so nothing catches you off guard.</div>
+        </div>
+        <div class="example">
+          <div class="example-label">The ways you'll try to quit — by domain</div>
+          <strong>Fitness:</strong> "I'll skip because of a social event." Week 3 motivation crash. "I'm too sore." Pathetic.<br>
+          <strong>Finance:</strong> Lifestyle inflation the second you earn more. "I deserve this." Impatience. Comparison envy.<br>
+          <strong>Career:</strong> Hiding from visibility. Perfectionism paralysis. Staying comfortable. Picking safe mentors who won't push you.<br>
+          <strong>Relationships:</strong> Avoiding hard conversations. Keeping score. Going silent under stress.
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">Every way I'm going to try to quit — be brutally specific</div>
+        <textarea rows="5" placeholder="1. I'll fold when it gets hard in week 3 because...&#10;2. I'll get distracted by [specific thing] and use it as an excuse...&#10;3. I'll rationalize quitting by telling myself...&#10;4. My environment will try to pull me back because...&#10;5. My own weakness will show up as..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">id</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">Identity audit — the invisible chain you refuse to see</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Here's something most people never confront: you will unconsciously destroy any goal that conflicts with who you believe you are. Your brain demands consistency between your actions and your identity — and if your identity says "I'm not that person," your brain will make damn sure you prove yourself right.
+        <div class="insight pb4">
+          Recognize these? You start strong and mysteriously stop. You "forget" things you planned. You feel weirdly uncomfortable when things go well. You hide from success. That's not bad luck — that's your limiting identity pulling you back to what feels familiar.
+        </div>
+        The beliefs that are strangling you right now:
+        <div style="margin: .75rem 0;">
+          <div class="metric-row"><span class="metric-key">"I'm not a disciplined person"</span><span class="metric-val">→ Self-imposed death sentence</span></div>
+          <div class="metric-row"><span class="metric-key">"People like me don't get that"</span><span class="metric-val">→ Surrendering before the fight</span></div>
+          <div class="metric-row"><span class="metric-key">"I'm not the type who..."</span><span class="metric-val">→ You made that up. Destroy it.</span></div>
+          <div class="metric-row"><span class="metric-key">"I always give up"</span><span class="metric-val">→ Only if you let this be true again</span></div>
+        </div>
+        <strong>The fix:</strong> You don't debate the belief. You violate it. Act in direct contradiction, collect the proof, and force your brain to update. Your identity is not a fact — it's a story you've been telling yourself. Write a new one through action.
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">The limiting beliefs you need to confront and destroy</div>
+        <textarea rows="3" placeholder='"Deep down I believe I am..."&#10;"The story I tell myself about why I can&#39;t is..."&#10;"The real reason I&#39;ve been holding back is..."'></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-tool">✓</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--success)">Constraints checklist</div>
+          <div class="card-title">No moving on until these are done. No shortcuts.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1.25rem;">
+        <ul class="checklist" id="cl2">
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've identified the ONE constraint that's choking my progress — no deflecting</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've listed every way I'm going to try to quit and made a kill plan for each</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Every failure mode has a pre-loaded response: "when X happens, I will Y"</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've named the limiting identity beliefs and I'm ready to violate them with action</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I'm attacking the real bottleneck — not hiding behind busywork</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======= PHASE 3: LEVERAGE ======= -->
+<section class="phase-section" id="phase3">
+  <div class="phase-eyebrow">
+    <span class="phase-badge pbadge3">Phase 03</span>
+    <div class="phase-line"></div>
+    <span class="phase-number pc3">Leverage</span>
+  </div>
+  <h1 class="phase-title pc3">3 moves. Maximum violence. Zero waste.</h1>
+  <p class="phase-subtitle">You can't do everything and you shouldn't try. Scattered effort is the hallmark of someone who's busy but going nowhere. Find the 3 moves that produce disproportionate results — the ones that make everything else either easier or irrelevant. Attack those. Ignore the rest.</p>
+
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">↗</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">Asymmetric warfare — small risk, massive upside</div>
+        </div>
+        <span class="badge b-logic">Core</span>
+      </div>
+      <div class="card-body">
+        For every action on your list, ask: <strong>what's the worst that happens if this fails? What's the best that happens if it works?</strong> Only take bets where the downside is survivable and the upside could change everything. This is how people 10x their trajectory while others grind linearly forever.
+        <div class="formula">
+          <span class="comment">// Asymmetry test — run this on every major action</span><br>
+          Worst case downside:  [Can I survive it? Is it reversible?]<br>
+          Best case upside:     [How big? How lasting? Does it compound?]<br>
+          Ratio (upside/downside): if it's not > 3:1, don't bother<br><br>
+          <span class="comment">// High-leverage examples — notice the pattern</span><br>
+          Cold email a mentor  →  worst: ignored. Best: changes your life<br>
+          Publish your work    →  worst: crickets. Best: opens doors you can't even see yet<br>
+          Have the hard convo  →  worst: 5 min of awkward. Best: transforms a relationship
+        </div>
+        The fear you feel IS the signal. If the outcome were guaranteed, everyone would do it and the leverage would be gone. <strong>The uncertainty is where the gold is. Stop running from it.</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">◉</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">Keystone habits — one domino that topples everything</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Certain habits create chain reactions across your entire life. One habit locks in and suddenly five other things fall into place. These are <strong>keystone habits</strong> — they work because winning in one area rewires your brain to demand wins everywhere else.
+        <div class="insight pb3">
+          <strong>Proven keystones that change everything:</strong> Hard physical training builds discipline that bleeds into every domain. Locked-in sleep sharpens every decision you make. Meal prep kills impulsivity at the source. Daily journaling forces you to confront your own patterns. Making your bed first thing sounds soft — but it's a declaration that you run your environment, not the other way around.
+        </div>
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div>Ask yourself: <strong>what one habit, if I locked it in with zero exceptions, would make 5 other things automatic?</strong> That's your keystone. Start there. Not at 10 things. One. Dominate it. Then expand.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My keystone habit candidate</div>
+        <input type="text" placeholder="If I consistently did this one thing...">
+        <div class="field-label" style="margin-top:.75rem">The 3-5 things it would make easier</div>
+        <textarea rows="3" placeholder="1. &#10;2. &#10;3."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">⟳</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">Network leverage — proximity beats grinding alone</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Skills take years. The right connection compresses that into months. One conversation with the right person can shortcut a 5-year timeline to 6 months. This isn't networking — it's strategic warfare. Get close to people who've already done what you're trying to do and absorb everything.
+        <div class="formula">
+          <span class="comment">// Network attack plan</span><br>
+          Target: who already has what I want?<br>
+          Bridge: who knows them AND knows me?<br>
+          Value:  what can I bring that they'd actually care about?<br>
+          Ask:    specific, small, impossible to say no to
+        </div>
+        <div class="example">
+          <div class="example-label">You think you have nothing to offer? Wrong.</div>
+          Genuine hunger and thoughtful questions (nobody asks good questions anymore) · Research, writing, or a skill they don't have time for · Connections you have that they don't · Willingness to do the unglamorous work nobody else wants to do · A well-written summary of their ideas they can share
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">3 people who've already solved my problem</div>
+        <textarea rows="3" placeholder="1. [Name/type] — who might connect me: [name]&#10;2. &#10;3."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-deep">⊞</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:#9b7ac8">Deep work</div>
+          <div class="card-title">Are you doing tasks or building assets? There's a massive difference.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Most people spend their lives doing things that produce a one-time result and then evaporate. Winners invest in actions that compound — things that keep paying dividends long after the work is done.
+        <div style="margin: .75rem 0;">
+          <div class="metric-row"><span class="metric-key">Linear: doing the task yourself, once</span><span class="metric-val">1× return — then it's gone</span></div>
+          <div class="metric-row"><span class="metric-key">Compound: building a skill</span><span class="metric-val">10× over years</span></div>
+          <div class="metric-row"><span class="metric-key">Compound: building a system</span><span class="metric-val">Runs without you</span></div>
+          <div class="metric-row"><span class="metric-key">Compound: building a reputation</span><span class="metric-val">Opportunities come to you</span></div>
+          <div class="metric-row"><span class="metric-key">Compound: investing money</span><span class="metric-val">Exponential curve</span></div>
+          <div class="metric-row"><span class="metric-key">Compound: documenting knowledge</span><span class="metric-val">Pays forever</span></div>
+        </div>
+        <strong>Ask yourself every single week:</strong> Am I burning time on tasks that expire tomorrow, or am I building something that compounds? If the answer is tasks, you're on a treadmill. Get off it.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-tool">✓</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--success)">Leverage checklist</div>
+          <div class="card-title">Lock these in before advancing. No half-measures.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1.25rem;">
+        <div class="field-label" style="margin-bottom:.75rem">My top 3 high-leverage moves</div>
+        <input type="text" placeholder="Move 1:" style="margin-bottom:6px">
+        <input type="text" placeholder="Move 2:" style="margin-bottom:6px">
+        <input type="text" placeholder="Move 3:" style="margin-bottom:1rem">
+        <ul class="checklist" id="cl3">
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>All 3 moves pass the asymmetry test — survivable downside, massive upside</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've identified my keystone habit and I'm executing it with zero exceptions</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've mapped 3 people who are where I want to be and a path to reach each</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>At least one move builds a compounding asset — not a one-time task</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I've ruthlessly cut at least 3 things that don't serve the mission</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======= PHASE 4: SYSTEM ======= -->
+<section class="phase-section" id="phase4">
+  <div class="phase-eyebrow">
+    <span class="phase-badge pbadge4">Phase 04</span>
+    <div class="phase-line"></div>
+    <span class="phase-number pc4">System</span>
+  </div>
+  <h1 class="phase-title pc4">Rig the game so your weak self can't lose</h1>
+  <p class="phase-subtitle">Stop relying on willpower. Willpower is a finite resource and you burn through it every day on garbage decisions. The answer isn't "try harder" — it's engineering your environment so the right action is the easiest action and the wrong action requires effort. Build a system that works when you're tired, when you're weak, when you don't feel like it.</p>
+
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">if</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">If-then plans — pre-load your decisions so weakness can't intervene</div>
+        </div>
+        <span class="badge b-psy">Core</span>
+      </div>
+      <div class="card-body">
+        People who pre-load their decisions with if-then rules are 2–3× more likely to follow through. Why? Because when the moment arrives, the decision is already made. There's no debate, no negotiation with your weaker self. The trigger fires, you execute.
+        <div class="formula">
+          <span class="comment">// The if-then protocol — no room for negotiation</span><br>
+          "When [trigger X], I will [exact behavior Y] in [location Z]."<br><br>
+          <span class="comment">// Examples — notice the specificity</span><br>
+          "When my alarm hits 5:30am, shoes go on and I'm out the door. No phone. No exceptions."<br>
+          "When I sit down at my desk, the hardest task opens first. Not email. Not Slack."<br>
+          "When I feel the pull to scroll, I drop and do 20 pushups. Every time."
+        </div>
+        The specificity is the weapon. "I'll try to eat better" is a joke. "When I open the fridge, I grab the meal prep container — not whatever's easy" is a rule that survives contact with your laziest self.
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">Write 3 implementation intentions for your goal</div>
+        <textarea rows="4" placeholder='When [cue], I will [behavior] in [location].&#10;When [cue], I will [behavior] in [location].&#10;When [cue], I will [behavior] in [location].'></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">⊕</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">Friction engineering — make the right thing effortless, the wrong thing impossible</div>
+        </div>
+        <span class="badge b-psy">Core</span>
+      </div>
+      <div class="card-body">
+        You will always take the path of least resistance. Always. Stop fighting that and start using it. Make the destructive option require effort. Make the productive option the default. Rig your environment like a weapon.
+        <div style="margin: .75rem 0;">
+          <div class="metric-row"><span class="metric-key">Want to read more?</span><span class="metric-val">Book on pillow. Phone in another room. Done.</span></div>
+          <div class="metric-row"><span class="metric-key">Want to eat clean?</span><span class="metric-val">Don't buy garbage. You can't eat what isn't there.</span></div>
+          <div class="metric-row"><span class="metric-key">Want to save money?</span><span class="metric-val">Auto-transfer on payday. You never see it. You never miss it.</span></div>
+          <div class="metric-row"><span class="metric-key">Want to train?</span><span class="metric-val">Sleep in gym clothes. Shoes at the door. Zero decisions.</span></div>
+          <div class="metric-row"><span class="metric-key">Want to stop doomscrolling?</span><span class="metric-val">Delete the apps. All of them. Today.</span></div>
+          <div class="metric-row"><span class="metric-key">Want to write more?</span><span class="metric-val">Doc open when computer boots. No choice required.</span></div>
+        </div>
+        <strong>Never rely on motivation. Never rely on memory. Never rely on "trying harder."</strong> Engineer the environment so the right choice is automatic and the wrong choice takes effort. Your future self is weak. Build a cage that protects them from themselves.
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="two-col">
+          <div>
+            <div class="field-label">Friction to ADD (bad defaults)</div>
+            <textarea rows="3" placeholder="1. Delete/hide...&#10;2. Put [X] away...&#10;3. Make [Y] harder by..."></textarea>
+          </div>
+          <div>
+            <div class="field-label">Friction to REMOVE (good defaults)</div>
+            <textarea rows="3" placeholder="1. Lay out...&#10;2. Pre-prepare...&#10;3. Auto-schedule..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">▣</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">Time blocking — your to-do list is a fantasy. Your calendar is reality.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        A to-do list is a wish list for people who don't finish things. A calendar block is a contract with yourself. If the work doesn't have a time slot, it doesn't exist. Period.
+        <div class="formula">
+          <span class="comment">// Non-negotiable time structure</span><br>
+          Peak energy (usually AM): Deep work ONLY.<br>
+          No email. No meetings. No admin. No phone. Nothing.<br><br>
+          Mid-energy (afternoon): Meetings, calls, collaboration.<br><br>
+          Low energy (late day): Admin, email, low-stakes tasks.<br><br>
+          <span class="comment">// Rules — treat these like law</span><br>
+          Schedule the hardest, highest-leverage work FIRST.<br>
+          Deep work blocks are sacred. Defend them like your life depends on it.
+        </div>
+        <div class="callout">
+          <div class="callout-icon">⚠</div>
+          <div><strong>If you don't own your calendar, everyone else will.</strong> Block your deep work before anyone can touch it. Every hour you give away to someone else's priorities is an hour stolen from your mission. Protect it violently.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My peak energy window + deep work block</div>
+        <input type="text" placeholder="e.g. Mon–Fri 9–11am: deep work. No exceptions.">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">$</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">Commitment devices — put skin in the game or you'll quit</div>
+        </div>
+      </div>
+      <div class="card-body">
+        You fear losing things 2× more than you enjoy gaining them. Use that against yourself. A commitment device makes quitting more painful than pushing through. Without stakes, your promises to yourself are worthless — and you know it.
+        <div class="example">
+          <div class="example-label">Ways to make quitting cost you</div>
+          <strong>Social accountability:</strong> Tell someone who will hold your feet to the fire — not someone who'll pat your back when you fail.<br><br>
+          <strong>Financial stake:</strong> Put real money on the line. If you miss your target, it goes to a cause you hate. Make it hurt.<br><br>
+          <strong>Public declaration:</strong> Post it. Tell everyone. Now your reputation is on the line. That changes everything.<br><br>
+          <strong>Burn the boats:</strong> Make the weak option impossible. Delete the account. Cancel the subscription. Remove the escape route entirely.
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My commitment device for this goal</div>
+        <textarea rows="2" placeholder="e.g. I will tell [person] my weekly target. If I miss it, I owe them $50."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-tool">✓</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--success)">System checklist</div>
+          <div class="card-title">Your system is only real when all of these are locked</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1.25rem;">
+        <ul class="checklist" id="cl4">
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I have 3 if-then rules written and memorized — no thinking required when triggered</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>My environment is rigged — right actions are effortless, wrong actions require effort</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Deep work is blocked on my calendar and defended like sacred ground</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I have a commitment device with real stakes — quitting costs me something</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Money moves are automated — savings and investments happen without my input</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>This system runs even on my worst day — it does not depend on motivation</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======= PHASE 5: MEASURE ======= -->
+<section class="phase-section" id="phase5">
+  <div class="phase-eyebrow">
+    <span class="phase-badge pbadge5">Phase 05</span>
+    <div class="phase-line"></div>
+    <span class="phase-number pc5">Measure</span>
+  </div>
+  <h1 class="phase-title pc5">What gets measured gets done. Everything else is a lie you tell yourself.</h1>
+  <p class="phase-subtitle">If you're not tracking it, you're guessing. And you're probably guessing wrong. Outcomes show up too late to fix anything. You need to measure the daily inputs — the things you control — so you catch failures weeks before they become disasters.</p>
+
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">→</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">Stop obsessing over results. Control the inputs.</div>
+        </div>
+        <span class="badge b-logic">Core</span>
+      </div>
+      <div class="card-body">
+        You can't control outcomes. You can only control the behaviors that produce them. Staring at the scale every day doesn't make you lighter — tracking your meals and workouts does. Most people obsess over results they can't directly change and ignore the daily inputs that actually move the needle.
+        <div style="margin: .75rem 0;">
+          <div class="metric-row"><span class="metric-key" style="color:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:.08em">GOAL DOMAIN</span><span class="metric-val" style="color:var(--danger);font-size:11px">LAGGING (outcome)</span></div>
+          <div class="metric-row"><span class="metric-key">Weight / body comp</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Calories tracked, workouts/week</span></div>
+          <div class="metric-row"><span class="metric-key">Revenue / income</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Outreach sent, proposals made</span></div>
+          <div class="metric-row"><span class="metric-key">Relationship quality</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Intentional conversations/week</span></div>
+          <div class="metric-row"><span class="metric-key">Net worth</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Savings rate %, investments added</span></div>
+          <div class="metric-row"><span class="metric-key">Knowledge / skills</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Hours of deliberate practice</span></div>
+        </div>
+        <strong>Track inputs daily. That's your scoreboard. Review outcomes monthly</strong> to verify the inputs are actually producing results. If they're not, change the inputs. Don't just hope harder.
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="two-col">
+          <div>
+            <div class="field-label">My leading indicators (daily)</div>
+            <textarea rows="3" placeholder="1. &#10;2. &#10;3."></textarea>
+          </div>
+          <div>
+            <div class="field-label">My lagging indicators (monthly)</div>
+            <textarea rows="3" placeholder="1. &#10;2. &#10;3."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">⟲</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">The weekly review — 30 minutes of brutal honesty with yourself</div>
+        </div>
+        <span class="badge b-logic">Core</span>
+      </div>
+      <div class="card-body">
+        Without a weekly review, you're repeating the same failures on autopilot and calling it "trying." With a review, you debug your own behavior every single week. That's 52 forced reckonings per year. That's how ordinary people build extraordinary lives — through relentless self-correction.
+        <div class="formula">
+          <span class="comment">// Weekly review — no sugarcoating allowed</span><br>
+          Q1: What did I commit to doing this week?<br>
+          Q2: What did I actually do?<br>
+          Q3: Why is there a gap? (No excuses. Real reasons.)<br>
+          Q4: What's the ONE thing that matters most next week?<br>
+          Q5: What am I going to stop doing or cut entirely?<br><br>
+          <span class="comment">// Check your inputs — are you hitting them daily?</span><br>
+          <span class="comment">// Has your bottleneck shifted? Be honest.</span>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My weekly review — day, time, no excuses</div>
+        <input type="text" placeholder="e.g. Every Sunday at 6pm. Blocked. Sacred. Miss it and the whole system breaks.">
+        <div class="field-label" style="margin-top:.75rem">This week's gap — what I said vs. what I did and why</div>
+        <textarea rows="3" placeholder="I committed to... but actually... because the real reason was..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-warn">⚠</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--danger)">Watch out</div>
+          <div class="card-title">Don't game your own metrics — you're only cheating yourself</div>
+        </div>
+      </div>
+      <div class="card-body">
+        "When a measure becomes a target, it ceases to be a good measure." If you chase one number obsessively, you'll destroy everything around it to pump that number up. This isn't theoretical — this is how people ruin their health chasing money, their relationships chasing status, and their growth chasing vanity metrics.
+        <div class="example">
+          <div class="example-label">How people game themselves into failure</div>
+          <strong>Revenue only:</strong> You oversell, churn explodes, reputation burns<br>
+          <strong>Gym frequency only:</strong> You show up but coast through garbage sessions and wonder why nothing changes<br>
+          <strong>Pages read only:</strong> You speed-read, retain nothing, and call it "learning"<br>
+          <strong>Savings rate only:</strong> You starve your health, relationships, and career investments to hoard cash
+        </div>
+        <strong>The fix:</strong> Track 2–3 metrics across different domains. They keep each other honest. If one metric is winning while others are dying, your system is broken.
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My balance metrics (2–3 domains)</div>
+        <textarea rows="3" placeholder="Domain 1 (work): &#10;Domain 2 (health): &#10;Domain 3 (relationships):"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-tool">✓</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--success)">Measure checklist</div>
+          <div class="card-title">You don't get to advance until the scoreboard is real</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1.25rem;">
+        <ul class="checklist" id="cl5">
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I'm tracking 2–3 daily inputs — the behaviors I directly control</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Weekly review is calendar-locked. It happens. No negotiation.</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I check outcomes monthly — not daily. Daily outcome checks breed anxiety and quitting.</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I have balance metrics across 2–3 domains — I can't game one while the others die</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Tracking is simple enough that I'll actually do it every day, not just the first week</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======= PHASE 6: ITERATE ======= -->
+<section class="phase-section" id="phase6">
+  <div class="phase-eyebrow">
+    <span class="phase-badge pbadge6">Phase 06</span>
+    <div class="phase-line"></div>
+    <span class="phase-number pc6">Iterate</span>
+  </div>
+  <h1 class="phase-title pc6">Adapt or die. Your first plan is already wrong.</h1>
+  <p class="phase-subtitle">The plan you made on day one will be wrong. Accept that right now. The question isn't whether reality will punch you in the face — it will. The question is how fast you recover, adapt, and attack again. The people who win aren't the ones with the best plan. They're the ones who iterate the fastest.</p>
+
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-logic">⟳</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-title">Monthly recalibration — ruthless honesty check</div>
+        </div>
+        <span class="badge b-logic">Core</span>
+      </div>
+      <div class="card-body">
+        Once a month, sit down with your data and be savage with yourself. Are you actually trending toward the target, or are you just busy? <strong>Is this goal still the right one — or are you clinging to it out of stubbornness?</strong>
+        <div class="formula">
+          <span class="comment">// Monthly recalibration — no lying to yourself</span><br>
+          1. Are my daily inputs on track?<br>
+          2. Are the outcomes actually moving?<br>
+          3. Has the bottleneck shifted?<br>
+          4. Do I still want this — or has the real goal changed?<br>
+          5. What's the single weakest link in my system right now?
+        </div>
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div><strong>Don't confuse stubbornness with discipline.</strong> Staying on a dead-end path because you've already invested time is not toughness — it's stupidity. Your commitment is to the outcome, not the original plan. Pivoting when the data demands it is strength. Ignoring reality to protect your ego is how people waste years.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My monthly recalibration date</div>
+        <input type="text" placeholder="e.g. First Sunday of every month, morning">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">▷</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">Motivation is a lie. Action comes first. Always.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Waiting for motivation is the most popular form of quitting. "I'll do it when I feel like it" means "I'll never do it." Motivation does not precede action — it follows it. The entire culture of "find your passion" and "wait until you're ready" has destroyed more potential than any failure ever could.
+        <div class="insight pb6">
+          Your brain releases the chemicals that make you feel motivated AFTER you start working — not before. That surge of energy, that feeling of flow, that "I'm on fire" state? It only comes when you've already begun. You will never feel it sitting on the couch waiting for inspiration.
+        </div>
+        <div class="formula">
+          <span class="comment">// The 2-minute rule — just start</span><br>
+          Commit to 2 minutes. That's it. Just start.<br>
+          The hardest part is initiation. Not continuation.<br>
+          Once you're in motion, momentum takes over.<br><br>
+          <span class="comment">// The corollary</span><br>
+          Your system should make starting brain-dead easy.<br>
+          Zero decisions. Zero friction. Just go.
+        </div>
+        <strong>Stop waiting to feel like it.</strong> Schedule the work. Show up on time. Do it whether you're motivated or miserable. That's the difference between people who build something and people who spend their whole life "about to."
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-psy">∞</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-title">Become the person. Don't just do the things.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Tactics fade. Habits erode. But identity? Identity is permanent. The most powerful shift you can make isn't forcing yourself to do hard things — it's becoming the type of person for whom those things are non-negotiable. When the behavior is who you ARE, willpower becomes irrelevant.
+        <div class="example">
+          <div class="example-label">Stop "trying." Start being.</div>
+          "I'm trying to save money" → <strong>"I'm someone who builds wealth. Period."</strong><br>
+          "I'm working out" → <strong>"I'm an athlete. This is what I do."</strong><br>
+          "I'm trying to write" → <strong>"I'm a writer. Writers write. End of story."</strong><br>
+          "I'm trying to be calmer" → <strong>"I'm someone who controls their response. Always."</strong>
+        </div>
+        This isn't fake-it-till-you-make-it nonsense. Your brain demands consistency between your identity and your actions. <strong>Upgrade the identity and the brain will fight to make the behavior match.</strong> It's the most powerful hack that exists.
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div>Every decision is a vote. Before every choice, ask yourself: <strong>"What would the person I'm becoming do right now?"</strong> Then do exactly that. No debate. No hesitation. Act as if you're already that person and your brain will close the gap.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My new identity statement</div>
+        <input type="text" placeholder='e.g. "I am someone who builds wealth steadily and deliberately"'>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-warn">▬</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--danger)">Watch out</div>
+          <div class="card-title">The plateau — this is where most people quit. Don't be most people.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Results will stall. Guaranteed. You'll be grinding daily and nothing will move for weeks. This is where 99% of people quit. They interpret the plateau as proof that it's not working and they walk away — inches from the breakthrough. The plateau is not a sign to stop. <strong>It's the test. It's the filter that separates people who talk from people who do.</strong>
+        <div class="insight pb5">
+          <strong>The plateau is a signal to increase the challenge,</strong> not to surrender. Your body, your mind, your business — they all adapt to repeated stimulus. When things stall, it means you need more weight, a different angle, a harder push. Not less effort.
+        </div>
+        <div style="margin: .75rem 0;">
+          <div class="metric-row"><span class="metric-key">Fitness plateau</span><span class="metric-val">→ Go heavier. Change the stimulus. Suffer more.</span></div>
+          <div class="metric-row"><span class="metric-key">Skill plateau</span><span class="metric-val">→ Deliberate practice. Get a coach. Get humbled.</span></div>
+          <div class="metric-row"><span class="metric-key">Revenue plateau</span><span class="metric-val">→ New channel. New offer. New market. Stop repeating.</span></div>
+          <div class="metric-row"><span class="metric-key">Motivation plateau</span><span class="metric-val">→ Change the environment. Raise the stakes. Get angry.</span></div>
+        </div>
+        <strong>The rule:</strong> If results have stalled for 4+ weeks despite consistent inputs, change your approach. But never — ever — interpret a plateau as permission to quit.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-deep">◈</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:#9b7ac8">Deep work</div>
+          <div class="card-title">The annual review — full audit. No mercy.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        Once a year, step completely outside your daily grind and look at the entire machine from above. This isn't a pat on the back session. This is a cold, honest dissection of what worked, what failed, and what you've been avoiding.
+        <div class="formula">
+          <span class="comment">// Annual review — answer every one of these honestly</span><br>
+          What were my 3 biggest wins this year?<br>
+          What were my 3 biggest failures?<br>
+          What did I avoid that I should have faced head-on?<br>
+          What consumed time but produced absolutely nothing?<br>
+          What would my future self be screaming at me to start?<br>
+          What would my future self be begging me to stop?<br>
+          Is this goal still worth the price? Am I willing to keep paying?<br>
+          Who do I want to be in 12 months — and what has to change NOW?
+        </div>
+        <div class="callout">
+          <div class="callout-icon">→</div>
+          <div>Do this somewhere you've never been. Same room, same chair, same couch = same thinking. <strong>You need a new environment to see yourself clearly.</strong> Get out. Go somewhere uncomfortable. That's where the truth lives.</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1rem;">
+        <div class="field-label">My annual review date + location</div>
+        <input type="text" placeholder="e.g. Dec 28th, a quiet café I don't normally go to">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon t-tool">✓</div>
+        <div class="card-meta">
+          <div class="card-tag" style="color:var(--success)">Final checklist</div>
+          <div class="card-title">The machine is only live when every single one of these is true</div>
+        </div>
+      </div>
+      <div style="padding: 0 1.25rem 1.25rem;">
+        <ul class="checklist" id="cl6">
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I have a pass/fail goal with a hard deadline rooted in my actual values (Phase 1)</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>My bottleneck is identified and I'm attacking it directly — no hiding (Phase 2)</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I have 3 high-leverage moves with asymmetric upside that compound (Phase 3)</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>My environment is rigged so the right behavior requires zero willpower (Phase 4)</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I'm tracking daily inputs and reviewing weekly with zero excuses (Phase 5)</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Monthly recalibration and annual review are locked in — dates set, non-negotiable (Phase 6)</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I have a new identity statement and I'm living it — not just reciting it</li>
+          <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>This system runs on my worst day. It does not need motivation. It needs me to show up.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// ── Persistence ──
+const STORE = 'lef_v1';
+
+function saveAll() {
+  const data = {};
+  document.querySelectorAll('input[type=text], textarea').forEach((el, i) => {
+    data['field_' + i] = el.value;
+  });
+  document.querySelectorAll('.checklist li').forEach((el, i) => {
+    data['check_' + i] = el.classList.contains('done');
+  });
+  localStorage.setItem(STORE, JSON.stringify(data));
+}
+
+function loadAll() {
+  const raw = localStorage.getItem(STORE);
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  document.querySelectorAll('input[type=text], textarea').forEach((el, i) => {
+    if (data['field_' + i] != null) el.value = data['field_' + i];
+  });
+  document.querySelectorAll('.checklist li').forEach((el, i) => {
+    if (data['check_' + i]) el.classList.add('done');
+  });
+}
+
+function toggle(el) {
+  el.classList.toggle('done');
+  updateProgress();
+  saveAll();
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('.checklist li');
+  const done = document.querySelectorAll('.checklist li.done');
+  const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+function goToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadAll();
+  updateProgress();
+  document.querySelectorAll('input[type=text], textarea').forEach(el => {
+    el.addEventListener('input', saveAll);
+  });
+});
+
+const sections = document.querySelectorAll('.phase-section');
+const navItems = document.querySelectorAll('.nav-item');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navItems.forEach((n, i) => {
+        const ids = ['phase0','phase1','phase2','phase3','phase4','phase5','phase6'];
+        n.classList.toggle('active', ids[i] === id);
+      });
+    }
+  });
+}, { threshold: 0.25 });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
