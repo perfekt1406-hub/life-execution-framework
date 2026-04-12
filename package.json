@@ -6,7 +6,7 @@
   "scripts": {
     "start": "unset ELECTRON_RUN_AS_NODE && electron --no-sandbox .",
     "dist": "electron-builder",
-    "dist:linux": "electron-builder --linux",
+    "dist:linux": "electron-builder --linux && bash build/scripts/patch-deb.sh",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win"
   },

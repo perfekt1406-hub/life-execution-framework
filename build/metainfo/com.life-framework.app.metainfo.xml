@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.life-framework.app</id>
+  <name>Life Execution Framework</name>
+  <summary>A brutally honest life execution workbook</summary>
+  <description>
+    <p>
+      A structured, no-excuses framework for building discipline, identifying
+      constraints, finding leverage, and iterating your way to the life you
+      actually want. No motivation required — just execution.
+    </p>
+  </description>
+  <icon type="stock">life-execution-framework</icon>
+  <categories>
+    <category>Utility</category>
+  </categories>
+  <url type="homepage">https://github.com/perfekt1406-hub/life-execution-framework</url>
+  <provides>
+    <binary>life-execution-framework</binary>
+  </provides>
+  <releases>
+    <release version="1.0.0" date="2026-04-12"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

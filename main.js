@@ -8,7 +8,8 @@ const DAY_START_HOUR = 3;
 const DAY_START_MIN = 30;
 
 function getStatePath(name) {
-  const dir = path.join(app.getPath('userData'), 'state');
+  const suffix = app.isPackaged ? '' : '-dev';
+  const dir = path.join(app.getPath('userData'), `state${suffix}`);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return path.join(dir, name);
 }
