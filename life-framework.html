@@ -15,8 +15,8 @@
     --text: #e8e4dc;
     --muted: #7a7570;
     --muted2: #9e9890;
-    --accent: #c42b2b;
-    --accent2: #9e2020;
+    --accent: #c26b5a;
+    --accent2: #9e5548;
     --danger: #c26b5a;
     --success: #6b9e7a;
     --info: #6a8fbf;
@@ -423,25 +423,25 @@
   .pc2 { color: #6a8fbf; }
   .pc3 { color: #6b9e7a; }
   .pc4 { color: #9b7ac8; }
-  .pc5 { color: #c26b5a; }
+  .pc5 { color: #3d8880; }
   .pc6 { color: #bf9f5a; }
   .pb1 { border-left-color: #d4914a; }
   .pb2 { border-left-color: #6a8fbf; }
   .pb3 { border-left-color: #6b9e7a; }
   .pb4 { border-left-color: #9b7ac8; }
-  .pb5 { border-left-color: #c26b5a; }
+  .pb5 { border-left-color: #3d8880; }
   .pb6 { border-left-color: #bf9f5a; }
   .pbadge1 { color: #d4914a; background: rgba(212,145,74,.1); border-color: rgba(212,145,74,.3); }
   .pbadge2 { color: #6a8fbf; background: rgba(106,143,191,.1); border-color: rgba(106,143,191,.3); }
   .pbadge3 { color: #6b9e7a; background: rgba(107,158,122,.1); border-color: rgba(107,158,122,.3); }
   .pbadge4 { color: #9b7ac8; background: rgba(155,122,200,.1); border-color: rgba(155,122,200,.3); }
-  .pbadge5 { color: #c26b5a; background: rgba(194,107, 90,.1); border-color: rgba(194,107, 90,.3); }
+  .pbadge5 { color: #3d8880; background: rgba(61,136,128,.1); border-color: rgba(61,136,128,.3); }
   .pbadge6 { color: #bf9f5a; background: rgba(191,159, 90,.1); border-color: rgba(191,159, 90,.3); }
   .dot1 { background: #d4914a; }
   .dot2 { background: #6a8fbf; }
   .dot3 { background: #6b9e7a; }
   .dot4 { background: #9b7ac8; }
-  .dot5 { background: #c26b5a; }
+  .dot5 { background: #3d8880; }
   .dot6 { background: #bf9f5a; }
 
   /* ── Frameless window chrome ── */
@@ -583,6 +583,204 @@
   }
   .modal-btn:hover { background: var(--accent); }
 
+  /* ── Right sidebar ── */
+  .right-sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    padding: 2.5rem 0 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .rs-header {
+    padding: 0 1.25rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .rs-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .rs-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .rs-count {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .08em;
+    margin-top: 6px;
+  }
+  .rs-count span { color: var(--accent); }
+
+  /* ── Add todo ── */
+  .rs-add {
+    padding: 0 1.25rem;
+    margin-bottom: .75rem;
+  }
+  .rs-add-form {
+    display: flex;
+    gap: 6px;
+  }
+  .rs-add-form input {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .rs-add-form input:focus { border-color: var(--accent2); }
+  .rs-add-form input::placeholder { color: var(--muted); }
+  .rs-add-btn {
+    background: var(--accent2);
+    border: none;
+    border-radius: var(--radius);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+  }
+  .rs-add-btn:hover { background: var(--accent); }
+
+  /* ── Todo items ── */
+  .rs-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1.25rem;
+  }
+  .rs-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--muted2);
+    line-height: 1.5;
+    transition: color .15s, opacity .2s;
+  }
+  .rs-item:last-child { border-bottom: none; }
+  .rs-item.done { opacity: .4; }
+  .rs-item.done .rs-item-text { text-decoration: line-through; }
+  .rs-item-check {
+    width: 15px; height: 15px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+  .rs-item.done .rs-item-check {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .rs-item-check svg { display: none; width: 8px; height: 8px; }
+  .rs-item-check svg path { stroke: var(--bg); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .rs-item.done .rs-item-check svg { display: block; }
+  .rs-item-text {
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+  .rs-item-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity .15s, color .15s;
+    line-height: 1;
+    margin-top: 1px;
+  }
+  .rs-item:hover .rs-item-del { opacity: 1; }
+  .rs-item-del:hover { color: var(--danger); }
+
+  /* ── Empty state ── */
+  .rs-empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    line-height: 1.8;
+  }
+  .rs-empty-icon {
+    font-size: 20px;
+    margin-bottom: 8px;
+    opacity: .4;
+  }
+
+  /* ── Footer stats ── */
+  .rs-footer {
+    margin-top: auto;
+    padding: 1rem 1.25rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .rs-footer-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .06em;
+    padding: 3px 0;
+  }
+  .rs-footer-row .val { color: var(--text); }
+  .rs-clear-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+    transition: border-color .15s, color .15s;
+  }
+  .rs-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  @media (max-width: 1200px) {
+    .right-sidebar { display: none; }
+  }
+
   @media (max-width: 780px) {
     .phase-section { padding: 2rem 1.25rem 3rem; }
     .two-col { grid-template-columns: 1fr; }
@@ -607,7 +805,7 @@
         <div class="toggle-knob"></div>
       </div>
     </div>
-    <button class="modal-btn" onclick="confirmSetup()">Let's go</button>
+    <button class="modal-btn" onclick="confirmSetup()">Enter</button>
   </div>
 </div>
 
@@ -1686,6 +1884,28 @@
 </section>
 
 </main>
+
+<!-- ── Right sidebar: Today's Moves ── -->
+<aside class="right-sidebar">
+  <div class="rs-header">
+    <div class="rs-label">No wasted days</div>
+    <div class="rs-title">Today's Moves</div>
+    <div class="rs-count"><span id="rs-done-count">0</span> / <span id="rs-total-count">0</span> done</div>
+  </div>
+  <div class="rs-add">
+    <form class="rs-add-form" onsubmit="addMove(event)">
+      <input type="text" id="rs-input" placeholder="What's the move?" autocomplete="off">
+      <button type="submit" class="rs-add-btn">+</button>
+    </form>
+  </div>
+  <div class="rs-items" id="rs-items"></div>
+  <div class="rs-footer" id="rs-footer" style="display:none;">
+    <div class="rs-footer-row"><span>Open</span><span class="val" id="rs-open-count">0</span></div>
+    <div class="rs-footer-row"><span>Done</span><span class="val" id="rs-done-footer">0</span></div>
+    <button class="rs-clear-btn" onclick="clearDoneMoves()">Clear completed</button>
+  </div>
+</aside>
+
 </div>
 
 <script>
@@ -1694,7 +1914,7 @@ const STORE = 'lef_v1';
 
 function saveAll() {
   const data = {};
-  document.querySelectorAll('input[type=text], textarea').forEach((el, i) => {
+  document.querySelectorAll('.main input[type=text], .main textarea').forEach((el, i) => {
     data['field_' + i] = el.value;
   });
   document.querySelectorAll('.checklist li').forEach((el, i) => {
@@ -1707,7 +1927,7 @@ function loadAll() {
   const raw = localStorage.getItem(STORE);
   if (!raw) return;
   const data = JSON.parse(raw);
-  document.querySelectorAll('input[type=text], textarea').forEach((el, i) => {
+  document.querySelectorAll('.main input[type=text], .main textarea').forEach((el, i) => {
     if (data['field_' + i] != null) el.value = data['field_' + i];
   });
   document.querySelectorAll('.checklist li').forEach((el, i) => {
@@ -1780,7 +2000,7 @@ async function syncSidebarToggle() {
 document.addEventListener('DOMContentLoaded', async () => {
   loadAll();
   updateProgress();
-  document.querySelectorAll('input[type=text], textarea').forEach(el => {
+  document.querySelectorAll('.main input[type=text], .main textarea').forEach(el => {
     el.addEventListener('input', saveAll);
   });
 
@@ -1795,20 +2015,112 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 const sections = document.querySelectorAll('.phase-section');
 const navItems = document.querySelectorAll('.nav-item');
+const ids = ['phase0','phase1','phase2','phase3','phase4','phase5','phase6'];
+
+const visibilityMap = new Map();
 
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if (e.isIntersecting) {
-      const id = e.target.id;
-      navItems.forEach((n, i) => {
-        const ids = ['phase0','phase1','phase2','phase3','phase4','phase5','phase6'];
-        n.classList.toggle('active', ids[i] === id);
-      });
-    }
+    visibilityMap.set(e.target.id, e.intersectionRatio);
   });
-}, { threshold: 0.25 });
+
+  let bestId = null;
+  let bestRatio = -1;
+  visibilityMap.forEach((ratio, id) => {
+    if (ratio > bestRatio) { bestRatio = ratio; bestId = id; }
+  });
+
+  if (bestId) {
+    navItems.forEach((n, i) => {
+      n.classList.toggle('active', ids[i] === bestId);
+    });
+  }
+}, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0] });
 
 sections.forEach(s => observer.observe(s));
+
+// ── Today's Moves ──
+const MOVES_KEY = 'lef_moves_v1';
+
+function loadMoves() {
+  try { return JSON.parse(localStorage.getItem(MOVES_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveMoves(moves) {
+  localStorage.setItem(MOVES_KEY, JSON.stringify(moves));
+}
+
+function renderMoves() {
+  const moves = loadMoves();
+  const container = document.getElementById('rs-items');
+  const footer = document.getElementById('rs-footer');
+  const doneCount = moves.filter(m => m.done).length;
+  const openCount = moves.length - doneCount;
+
+  document.getElementById('rs-done-count').textContent = doneCount;
+  document.getElementById('rs-total-count').textContent = moves.length;
+  document.getElementById('rs-open-count').textContent = openCount;
+  document.getElementById('rs-done-footer').textContent = doneCount;
+  footer.style.display = moves.length ? '' : 'none';
+
+  if (!moves.length) {
+    container.innerHTML = '<div class="rs-empty"><div class="rs-empty-icon">—</div>No moves yet.<br>Add one above.</div>';
+    return;
+  }
+
+  container.innerHTML = moves.map((m, i) => `
+    <div class="rs-item${m.done ? ' done' : ''}" data-idx="${i}">
+      <div class="rs-item-check" onclick="toggleMove(${i})">
+        <svg viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg>
+      </div>
+      <div class="rs-item-text" onclick="toggleMove(${i})">${esc(m.text)}</div>
+      <button class="rs-item-del" onclick="deleteMove(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function addMove(e) {
+  e.preventDefault();
+  const input = document.getElementById('rs-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const moves = loadMoves();
+  moves.unshift({ text, done: false });
+  saveMoves(moves);
+  input.value = '';
+  renderMoves();
+}
+
+function toggleMove(idx) {
+  const moves = loadMoves();
+  if (moves[idx]) {
+    moves[idx].done = !moves[idx].done;
+    saveMoves(moves);
+    renderMoves();
+  }
+}
+
+function deleteMove(idx) {
+  const moves = loadMoves();
+  moves.splice(idx, 1);
+  saveMoves(moves);
+  renderMoves();
+}
+
+function clearDoneMoves() {
+  const moves = loadMoves().filter(m => !m.done);
+  saveMoves(moves);
+  renderMoves();
+}
+
+renderMoves();
 </script>
 </body>
 </html>
