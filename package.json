@@ -5,10 +5,14 @@
   "main": "main.js",
   "scripts": {
     "start": "unset ELECTRON_RUN_AS_NODE && electron --no-sandbox .",
-    "dist": "electron-builder",
-    "dist:linux": "electron-builder --linux && bash build/scripts/patch-deb.sh",
-    "dist:mac": "electron-builder --mac",
-    "dist:win": "electron-builder --win"
+    "dist": "bash build/scripts/clean-releases.sh --all && electron-builder && bash build/scripts/publish-releases.sh",
+    "dist:linux": "bash build/scripts/clean-releases.sh --linux && electron-builder --linux && bash build/scripts/patch-deb.sh && bash build/scripts/publish-releases.sh",
+    "dist:mac": "bash build/scripts/clean-releases.sh --mac && electron-builder --mac && bash build/scripts/publish-releases.sh",
+    "dist:win": "bash build/scripts/clean-releases.sh --win && electron-builder --win && bash build/scripts/publish-releases.sh",
+    "dist:linux:win": "npm run dist:linux && npm run dist:win",
+    "dist:linux:mac": "npm run dist:linux && npm run dist:mac",
+    "dist:mac:win": "npm run dist:mac && npm run dist:win",
+    "dist:linux:mac:win": "npm run dist:linux && npm run dist:mac && npm run dist:win"
   },
   "build": {
     "appId": "com.life-framework.app",

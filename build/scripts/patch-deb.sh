@@ -9,7 +9,7 @@ ROOT="$SCRIPT_DIR/../.."
 DIST="$ROOT/dist"
 METAINFO_SRC="$SCRIPT_DIR/../metainfo/com.life-framework.app.metainfo.xml"
 
-DEB="$(ls "$DIST"/*.deb | head -1)"
+DEB="$(ls "$DIST"/*.deb 2>/dev/null | head -1)"
 if [[ -z "$DEB" ]]; then
   echo "patch-deb: no .deb found in $DIST — skipping"
   exit 0

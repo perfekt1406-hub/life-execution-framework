@@ -1,23 +1,13 @@
 # Dependencies
 node_modules/
 
-# Build output
+# Build output (electron-builder default — metadata/temp, not tracked)
 dist/
 out/
-build/icons/*.icns
-build/icons/*.ico
-build/icons/*.png
 
-# Electron-builder artifacts
-*.AppImage
-*.deb
-*.dmg
-*.exe
-*.snap
-*.rpm
-*.zip
-*.blockmap
-*.tar.gz
+# Release artifacts (built locally, not tracked)
+releases/*
+!releases/.gitkeep
 
 # Logs
 npm-debug.log*
