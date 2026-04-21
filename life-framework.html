@@ -1,792 +1,17 @@
 <!DOCTYPE html>
+<!--
+  Life Execution Framework — Electron renderer shell (phases, sidebar, Today’s Moves, scripts).
+  Visual system lives in styles/app.css (Operations room theme; see theme-demos/operations-room.html).
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Life Execution Framework</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0e0e0e;
-    --bg2: #161616;
-    --bg3: #1f1f1f;
-    --border: #2a2a2a;
-    --border2: #363636;
-    --text: #e8e4dc;
-    --muted: #7a7570;
-    --muted2: #9e9890;
-    --accent: #c26b5a;
-    --accent2: #9e5548;
-    --danger: #c26b5a;
-    --success: #6b9e7a;
-    --info: #6a8fbf;
-    --warn: #bf9f5a;
-    --phase-colors: #d4914a, #6a8fbf, #6b9e7a, #c26b5a, #9b7ac8, #bf9f5a;
-    --serif: 'DM Serif Display', Georgia, serif;
-    --mono: 'DM Mono', monospace;
-    --sans: 'DM Sans', sans-serif;
-    --radius: 6px;
-    --radius-lg: 10px;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.7;
-    min-height: 100vh;
-  }
-
-  /* ── Layout ── */
-  .app { display: flex; min-height: 100vh; }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    width: 260px;
-    min-width: 260px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    padding: 2rem 0;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar-brand {
-    padding: 0 1.5rem 2rem;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1.5rem;
-  }
-  .brand-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .14em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .brand-title {
-    font-family: var(--serif);
-    font-size: 20px;
-    color: var(--accent);
-    line-height: 1.2;
-    font-style: italic;
-  }
-  .nav-section-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .16em;
-    color: var(--muted);
-    text-transform: uppercase;
-    padding: 0 1.5rem;
-    margin-bottom: .75rem;
-  }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 1.5rem;
-    cursor: pointer;
-    transition: background .15s;
-    border-left: 2px solid transparent;
-    color: var(--muted2);
-    font-size: 13px;
-    user-select: none;
-  }
-  .nav-item:hover { background: var(--bg3); color: var(--text); }
-  .nav-item.active { background: var(--bg3); color: var(--text); border-left-color: var(--accent); }
-  .nav-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    flex-shrink: 0; opacity: .5;
-    transition: opacity .15s;
-  }
-  .nav-item.active .nav-dot { opacity: 1; }
-  .nav-num {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    margin-left: auto;
-  }
-  .sidebar-footer {
-    margin-top: auto;
-    padding: 1.5rem;
-    border-top: 1px solid var(--border);
-  }
-  .progress-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: .1em;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-  }
-  .progress-bar {
-    background: var(--border);
-    border-radius: 10px;
-    height: 4px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 10px;
-    transition: width .4s ease;
-    width: 0%;
-  }
-
-  /* ── Main ── */
-  .main { flex: 1; min-width: 0; }
-  .phase-section {
-    padding: 3.5rem 3rem 4rem;
-    border-bottom: 1px solid var(--border);
-    max-width: 860px;
-  }
-  .phase-section:last-child { border-bottom: none; }
-
-  /* ── Phase header ── */
-  .phase-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 1.25rem;
-  }
-  .phase-badge {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .12em;
-    padding: 3px 10px;
-    border-radius: 20px;
-    border: 1px solid;
-    text-transform: uppercase;
-  }
-  .phase-line {
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-  .phase-number {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: .1em;
-  }
-  .phase-title {
-    font-family: var(--serif);
-    font-size: 36px;
-    line-height: 1.15;
-    margin-bottom: .75rem;
-  }
-  .phase-subtitle {
-    font-size: 15px;
-    color: var(--muted2);
-    line-height: 1.75;
-    max-width: 620px;
-    margin-bottom: 2.5rem;
-    border-left: 2px solid var(--border2);
-    padding-left: 1rem;
-  }
-
-  /* ── Cards ── */
-  .cards-grid { display: flex; flex-direction: column; gap: 12px; }
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: border-color .15s;
-  }
-  .card:hover { border-color: var(--border2); }
-  .card-header {
-    padding: 1.1rem 1.25rem .75rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .card-icon {
-    width: 28px; height: 28px;
-    border-radius: var(--radius);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    font-family: var(--mono);
-    font-weight: 500;
-  }
-  .card-meta { flex: 1; min-width: 0; }
-  .card-tag {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-bottom: 3px;
-  }
-  .card-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.35; }
-  .card-body {
-    padding: 0 1.25rem .9rem 1.25rem;
-    font-size: 13.5px;
-    color: var(--muted2);
-    line-height: 1.75;
-  }
-  .card-body strong { color: var(--text); font-weight: 500; }
-  .card-body em { color: var(--accent); font-style: normal; font-family: var(--mono); font-size: 12px; }
-  .card-divider { border: none; border-top: 1px solid var(--border); margin: 0 1.25rem .9rem; }
-
-  /* ── Tag types ── */
-  .t-logic  { color: var(--info);    background: rgba(106,143,191,.12); }
-  .t-psy    { color: var(--warn);    background: rgba(191,159, 90,.12); }
-  .t-warn   { color: var(--danger);  background: rgba(194,107, 90,.12); }
-  .t-tool   { color: var(--success); background: rgba(107,158,122,.12); }
-  .t-deep   { color: #9b7ac8;        background: rgba(155,122,200,.12); }
-
-  .badge { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
-  .b-logic  { color: var(--info);    background: rgba(106,143,191,.15); border: 1px solid rgba(106,143,191,.3); }
-  .b-psy    { color: var(--warn);    background: rgba(191,159, 90,.15); border: 1px solid rgba(191,159, 90,.3); }
-  .b-warn   { color: var(--danger);  background: rgba(194,107, 90,.15); border: 1px solid rgba(194,107, 90,.3); }
-  .b-tool   { color: var(--success); background: rgba(107,158,122,.15); border: 1px solid rgba(107,158,122,.3); }
-  .b-deep   { color: #9b7ac8;        background: rgba(155,122,200,.15); border: 1px solid rgba(155,122,200,.3); }
-
-  /* ── Checklist ── */
-  .checklist { list-style: none; margin-top: .75rem; }
-  .checklist-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .checklist li {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--muted2);
-    line-height: 1.5;
-    cursor: pointer;
-    transition: color .1s;
-  }
-  .checklist li:last-child { border-bottom: none; }
-  .checklist li:hover { color: var(--text); }
-  .checklist li.done { text-decoration: line-through; opacity: .45; }
-  .check-box {
-    width: 16px; height: 16px;
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s;
-  }
-  .checklist li.done .check-box {
-    background: var(--success);
-    border-color: var(--success);
-  }
-  .check-tick { display: none; width: 9px; height: 9px; }
-  .check-tick path { stroke: var(--bg); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  .checklist li.done .check-tick { display: block; }
-
-  /* ── Textarea / inputs ── */
-  .field-block { margin-top: .9rem; }
-  .field-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 7px;
-  }
-  textarea, input[type=text] {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 12.5px;
-    line-height: 1.6;
-    padding: 10px 12px;
-    outline: none;
-    resize: vertical;
-    transition: border-color .15s;
-  }
-  textarea:focus, input[type=text]:focus { border-color: var(--accent2); }
-  textarea::placeholder, input[type=text]::placeholder { color: var(--muted); }
-
-  /* ── Two-col ── */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* ── Insight block ── */
-  .insight {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    padding: 1rem 1.1rem;
-    margin: .75rem 0;
-    font-size: 13px;
-    color: var(--muted2);
-    line-height: 1.7;
-  }
-  .insight strong { color: var(--accent); font-weight: 500; }
-
-  .callout {
-    display: flex;
-    gap: 12px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: .9rem 1rem;
-    margin: .75rem 0;
-    font-size: 13px;
-    color: var(--muted2);
-    line-height: 1.65;
-  }
-  .callout-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
-  .callout strong { color: var(--text); font-weight: 500; }
-
-  /* ── Section heading ── */
-  .section-h {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 2rem 0 1rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .section-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-  /* ── Formula block ── */
-  .formula {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    font-family: var(--mono);
-    font-size: 12.5px;
-    color: var(--accent);
-    margin: .75rem 0;
-    line-height: 1.9;
-  }
-  .formula .comment { color: var(--muted); font-style: italic; }
-
-  /* ── Example block ── */
-  .example {
-    background: rgba(106,143,191,.06);
-    border: 1px solid rgba(106,143,191,.2);
-    border-radius: var(--radius);
-    padding: .9rem 1rem;
-    font-size: 13px;
-    color: var(--muted2);
-    line-height: 1.7;
-    margin: .75rem 0;
-  }
-  .example-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--info);
-    margin-bottom: 5px;
-  }
-  .example strong { color: var(--text); font-weight: 500; }
-
-  /* ── Metric table ── */
-  .metric-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .metric-row:last-child { border-bottom: none; }
-  .metric-key { color: var(--muted2); }
-  .metric-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
-
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
-
-  /* ── Phase colors ── */
-  .pc1 { color: #d4914a; }
-  .pc2 { color: #6a8fbf; }
-  .pc3 { color: #6b9e7a; }
-  .pc4 { color: #9b7ac8; }
-  .pc5 { color: #3d8880; }
-  .pc6 { color: #bf9f5a; }
-  .pb1 { border-left-color: #d4914a; }
-  .pb2 { border-left-color: #6a8fbf; }
-  .pb3 { border-left-color: #6b9e7a; }
-  .pb4 { border-left-color: #9b7ac8; }
-  .pb5 { border-left-color: #3d8880; }
-  .pb6 { border-left-color: #bf9f5a; }
-  .pbadge1 { color: #d4914a; background: rgba(212,145,74,.1); border-color: rgba(212,145,74,.3); }
-  .pbadge2 { color: #6a8fbf; background: rgba(106,143,191,.1); border-color: rgba(106,143,191,.3); }
-  .pbadge3 { color: #6b9e7a; background: rgba(107,158,122,.1); border-color: rgba(107,158,122,.3); }
-  .pbadge4 { color: #9b7ac8; background: rgba(155,122,200,.1); border-color: rgba(155,122,200,.3); }
-  .pbadge5 { color: #3d8880; background: rgba(61,136,128,.1); border-color: rgba(61,136,128,.3); }
-  .pbadge6 { color: #bf9f5a; background: rgba(191,159, 90,.1); border-color: rgba(191,159, 90,.3); }
-  .dot1 { background: #d4914a; }
-  .dot2 { background: #6a8fbf; }
-  .dot3 { background: #6b9e7a; }
-  .dot4 { background: #9b7ac8; }
-  .dot5 { background: #3d8880; }
-  .dot6 { background: #bf9f5a; }
-
-  /* ── Frameless window chrome ── */
-  .titlebar {
-    -webkit-app-region: drag;
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 32px;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 10px;
-    gap: 6px;
-  }
-  .titlebar-btn {
-    -webkit-app-region: no-drag;
-    width: 13px; height: 13px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .titlebar-btn.close   { background: #ff5f57; }
-  .titlebar-btn.min     { background: #febc2e; }
-  .titlebar-btn.max     { background: #28c840; }
-  .titlebar-btn:hover { filter: brightness(0.85); }
-  .sidebar { padding-top: 2.5rem; }
-  .main { padding-top: 32px; }
-
-  /* ── Autostart toggle ── */
-  .autostart-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.5rem;
-    margin-bottom: 1rem;
-  }
-  .autostart-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    user-select: none;
-  }
-  .toggle-track {
-    width: 34px; height: 18px;
-    background: var(--border2);
-    border-radius: 10px;
-    position: relative;
-    cursor: pointer;
-    flex-shrink: 0;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.1s ease-out;
-    contain: layout style;
-  }
-  .toggle-track.on { background: var(--accent); }
-  .toggle-track[data-busy="1"] { opacity: 0.85; pointer-events: none; }
-  .toggle-knob {
-    width: 14px; height: 14px;
-    background: var(--text);
-    border-radius: 50%;
-    position: absolute;
-    top: 2px; left: 2px;
-    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translate3d(0, 0, 0);
-    will-change: transform;
-  }
-  .toggle-track.on .toggle-knob { transform: translate3d(16px, 0, 0); }
-  @media (prefers-reduced-motion: reduce) {
-    .toggle-track, .toggle-knob { transition: none; }
-  }
-
-  /* ── First-run modal ── */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.7);
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-  .modal-overlay.hidden { display: none; }
-  .modal {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-lg);
-    max-width: 420px;
-    width: 90%;
-    padding: 2rem;
-    text-align: center;
-  }
-  .modal-icon {
-    font-size: 28px;
-    margin-bottom: 1rem;
-  }
-  .modal-title {
-    font-family: var(--serif);
-    font-size: 22px;
-    color: var(--text);
-    margin-bottom: .5rem;
-  }
-  .modal-desc {
-    font-size: 13px;
-    color: var(--muted2);
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-  }
-  .modal-toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 1.75rem;
-  }
-  .modal-toggle-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted2);
-    user-select: none;
-  }
-  .modal-btn {
-    background: var(--accent2);
-    color: var(--bg);
-    border: none;
-    border-radius: var(--radius);
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: 10px 28px;
-    cursor: pointer;
-    transition: background .15s;
-  }
-  .modal-btn:hover { background: var(--accent); }
-
-  /* ── Right sidebar ── */
-  .right-sidebar {
-    width: 280px;
-    min-width: 280px;
-    background: var(--bg2);
-    border-left: 1px solid var(--border);
-    padding: 2.5rem 0 2rem;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
-  .rs-header {
-    padding: 0 1.25rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1rem;
-  }
-  .rs-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .16em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .rs-title {
-    font-family: var(--serif);
-    font-size: 18px;
-    color: var(--text);
-    line-height: 1.2;
-  }
-  .rs-count {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: .08em;
-    margin-top: 6px;
-  }
-  .rs-count span { color: var(--accent); }
-
-  /* ── Add todo ── */
-  .rs-add {
-    padding: 0 1.25rem;
-    margin-bottom: .75rem;
-  }
-  .rs-add-form {
-    display: flex;
-    gap: 6px;
-  }
-  .rs-add-form input {
-    flex: 1;
-    min-width: 0;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 11.5px;
-    padding: 7px 10px;
-    outline: none;
-    transition: border-color .15s;
-  }
-  .rs-add-form input:focus { border-color: var(--accent2); }
-  .rs-add-form input::placeholder { color: var(--muted); }
-  .rs-add-btn {
-    background: var(--accent2);
-    border: none;
-    border-radius: var(--radius);
-    color: var(--bg);
-    font-family: var(--mono);
-    font-size: 14px;
-    font-weight: 500;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s;
-  }
-  .rs-add-btn:hover { background: var(--accent); }
-
-  /* ── Todo items ── */
-  .rs-items {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 1.25rem;
-  }
-  .rs-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 12.5px;
-    color: var(--muted2);
-    line-height: 1.5;
-    transition: color .15s, opacity .2s;
-  }
-  .rs-item:last-child { border-bottom: none; }
-  .rs-item.done { opacity: .4; }
-  .rs-item.done .rs-item-text { text-decoration: line-through; }
-  .rs-item-check {
-    width: 15px; height: 15px;
-    border: 1px solid var(--border2);
-    border-radius: 3px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all .15s;
-  }
-  .rs-item.done .rs-item-check {
-    background: var(--success);
-    border-color: var(--success);
-  }
-  .rs-item-check svg { display: none; width: 8px; height: 8px; }
-  .rs-item-check svg path { stroke: var(--bg); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  .rs-item.done .rs-item-check svg { display: block; }
-  .rs-item-text {
-    flex: 1;
-    min-width: 0;
-    word-break: break-word;
-  }
-  .rs-item-del {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 13px;
-    cursor: pointer;
-    padding: 0;
-    flex-shrink: 0;
-    opacity: 0;
-    transition: opacity .15s, color .15s;
-    line-height: 1;
-    margin-top: 1px;
-  }
-  .rs-item:hover .rs-item-del { opacity: 1; }
-  .rs-item-del:hover { color: var(--danger); }
-
-  /* ── Empty state ── */
-  .rs-empty {
-    padding: 2rem 0;
-    text-align: center;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: .06em;
-    line-height: 1.8;
-  }
-  .rs-empty-icon {
-    font-size: 20px;
-    margin-bottom: 8px;
-    opacity: .4;
-  }
-
-  /* ── Footer stats ── */
-  .rs-footer {
-    margin-top: auto;
-    padding: 1rem 1.25rem 0;
-    border-top: 1px solid var(--border);
-  }
-  .rs-footer-row {
-    display: flex;
-    justify-content: space-between;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: .06em;
-    padding: 3px 0;
-  }
-  .rs-footer-row .val { color: var(--text); }
-  .rs-clear-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: 5px 10px;
-    cursor: pointer;
-    margin-top: 10px;
-    width: 100%;
-    transition: border-color .15s, color .15s;
-  }
-  .rs-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
-
-  @media (max-width: 1200px) {
-    .right-sidebar { display: none; }
-  }
-
-  @media (max-width: 780px) {
-    .phase-section { padding: 2rem 1.25rem 3rem; }
-    .two-col { grid-template-columns: 1fr; }
-    .phase-title { font-size: 26px; }
-  }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/app.css">
 </head>
 <body>
 <div class="titlebar">
@@ -824,8 +49,8 @@
     </div>
   </div>
   <div class="nav-section-label">Phases</div>
-  <div class="nav-item active" onclick="goToSection('phase0')" style="border-left-color:var(--border2)">
-    <span class="nav-dot" style="background:var(--muted2)"></span> Discipline
+  <div class="nav-item nav-item--prereq active" onclick="goToSection('phase0')">
+    <span class="nav-dot nav-dot--idle"></span> Discipline
     <span class="nav-num">00</span>
   </div>
   <div class="nav-item" onclick="goToSection('phase1')">
@@ -867,13 +92,13 @@
 <main class="main">
 
 <!-- ======= PHASE 0: DISCIPLINE ======= -->
-<section class="phase-section" id="phase0">
+<section class="phase-section" id="phase0" data-phase="0">
   <div class="phase-eyebrow">
-    <span class="phase-badge pbadge1" style="color:#e8e4dc;background:rgba(232,228,220,.08);border-color:rgba(232,228,220,.2)">Phase 00</span>
+    <span class="phase-badge phase-badge--neutral">Phase 00</span>
     <div class="phase-line"></div>
-    <span class="phase-number" style="color:var(--muted2)">Prerequisite</span>
+    <span class="phase-number phase-number--muted">Prerequisite</span>
   </div>
-  <h1 class="phase-title" style="color:var(--text)">Stop reading. Start doing. Or leave.</h1>
+  <h1 class="phase-title">Stop reading. Start doing. Or leave.</h1>
   <p class="phase-subtitle">Everything past this point is worthless if you don't execute. You don't have a knowledge problem — you have an action problem. This section exists because you've been lying to yourself about why you haven't started. That ends now.</p>
 
   <div class="cards-grid">
@@ -882,14 +107,14 @@
       <div class="card-header">
         <div class="card-icon t-warn">≠</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--danger)">Misconception</div>
+          <div class="card-tag card-tag--danger">Misconception</div>
           <div class="card-title">You're not "undisciplined." You're untrained.</div>
         </div>
         <span class="badge b-warn">Read first</span>
       </div>
       <div class="card-body">
         You tell yourself you "lack discipline" like it's a genetic condition. That's a convenient lie. It lets you off the hook. Discipline isn't something you're born with — it's something you forge through pain and repetition, like calluses on your hands.
-        <div class="insight" style="border-left-color:var(--danger)">
+        <div class="insight insight--danger">
           Discipline is doing what you said you'd do when every fiber of your being screams to quit. It's a muscle. It atrophies when you baby it. It grows when you brutalize it. Nobody walked out of the womb with it — they built it one agonizing rep at a time.
         </div>
         Here's the truth: every time you follow through on a promise to yourself when it hurts, you cast a vote for the person you want to become. Every time you fold, you vote for the person you're trying to leave behind. <strong>You are building or destroying yourself with every single decision.</strong>
@@ -904,7 +129,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">Δ</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">You know what to do. You're choosing not to.</div>
         </div>
       </div>
@@ -928,7 +153,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">⚙</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">Progressive overload for the mind — how you actually build this</div>
         </div>
         <span class="badge b-logic">Actionable</span>
@@ -945,14 +170,14 @@
           Month 2+:  You've got proof now. You've got momentum.<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now go to war. Expand hard.
         </div>
-        <div class="insight" style="border-left-color:var(--info)">
+        <div class="insight insight--info">
           <strong>Never miss twice. Ever.</strong> One miss is a stumble. Two misses is a surrender. This is the one rule that holds the entire framework together. Miss once, fine — get back up swinging. But if you let that become two, then three, you're done. That's how every person who "almost made it" died inside. Don't be that person.
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My non-negotiable daily commitment — starts today, not Monday</div>
         <input type="text" placeholder="e.g. 50 pushups before I touch my phone. Every morning. No exceptions.">
-        <div class="field-label" style="margin-top:.75rem">How long before I add more weight</div>
+        <div class="field-label field-label--mt">How long before I add more weight</div>
         <input type="text" placeholder="e.g. 14 days with zero misses — then I double it">
       </div>
     </div>
@@ -961,7 +186,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">◑</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">You're addicted to comfort. That's what's killing you.</div>
         </div>
       </div>
@@ -984,21 +209,21 @@
       <div class="card-header">
         <div class="card-icon t-warn">✕</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--danger)">Watch out</div>
+          <div class="card-tag card-tag--danger">Watch out</div>
           <div class="card-title">The lies you tell yourself — call them out or they'll own you</div>
         </div>
       </div>
       <div class="card-body">
         These are the specific ways you sabotage yourself. You've been running these patterns for years. Name them now so you can destroy them on sight.
-        <div style="margin: .75rem 0;">
-          <div class="metric-row"><span class="metric-key">"If I can't do it perfectly, I won't do it at all"</span><span class="metric-val" style="color:var(--danger)">Coward's exit</span></div>
-          <div class="metric-row"><span class="metric-key">"I'll start Monday / next month / January"</span><span class="metric-val" style="color:var(--danger)">You won't. You never do.</span></div>
-          <div class="metric-row"><span class="metric-key">Planning, researching, organizing instead of doing</span><span class="metric-val" style="color:var(--danger)">Productive procrastination</span></div>
-          <div class="metric-row"><span class="metric-key">"I'm not ready yet"</span><span class="metric-val" style="color:var(--danger)">You'll never be. Go now.</span></div>
-          <div class="metric-row"><span class="metric-key">Comparing yourself to people 10 years ahead</span><span class="metric-val" style="color:var(--danger)">Excuse factory</span></div>
-          <div class="metric-row"><span class="metric-key">Beating yourself up and calling it "accountability"</span><span class="metric-val" style="color:var(--danger)">Suffering ≠ progress</span></div>
+        <div class="metric-table-wrap">
+          <div class="metric-row"><span class="metric-key">"If I can't do it perfectly, I won't do it at all"</span><span class="metric-val metric-val--danger">Coward's exit</span></div>
+          <div class="metric-row"><span class="metric-key">"I'll start Monday / next month / January"</span><span class="metric-val metric-val--danger">You won't. You never do.</span></div>
+          <div class="metric-row"><span class="metric-key">Planning, researching, organizing instead of doing</span><span class="metric-val metric-val--danger">Productive procrastination</span></div>
+          <div class="metric-row"><span class="metric-key">"I'm not ready yet"</span><span class="metric-val metric-val--danger">You'll never be. Go now.</span></div>
+          <div class="metric-row"><span class="metric-key">Comparing yourself to people 10 years ahead</span><span class="metric-val metric-val--danger">Excuse factory</span></div>
+          <div class="metric-row"><span class="metric-key">Beating yourself up and calling it "accountability"</span><span class="metric-val metric-val--danger">Suffering ≠ progress</span></div>
         </div>
-        <div class="insight" style="border-left-color:var(--danger)">
+        <div class="insight insight--danger">
           <strong>On self-destruction vs. self-correction:</strong> There's a difference between holding yourself accountable and beating yourself into the ground. Wallowing in guilt after a failure isn't discipline — it's self-indulgence disguised as toughness. Real accountability is cold: note what happened, extract the lesson, adjust, execute. No drama. No pity party. Move.
         </div>
       </div>
@@ -1008,11 +233,11 @@
       <div class="card-header">
         <div class="card-icon t-tool">✓</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--success)">Prerequisite checklist</div>
+          <div class="card-tag card-tag--success">Prerequisite checklist</div>
           <div class="card-title">Don't move forward until you can check every one of these</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1.25rem;">
+      <div class="card-footer card-footer--tight-bottom">
         <ul class="checklist" id="cl0">
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>I accept that discipline is built through suffering, not granted at birth</li>
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Choose one daily non-negotiable commitment and start it today</li>
@@ -1027,7 +252,7 @@
 </section>
 
 <!-- ======= PHASE 1: CLARITY ======= -->
-<section class="phase-section" id="phase1">
+<section class="phase-section" id="phase1" data-phase="1">
   <div class="phase-eyebrow">
     <span class="phase-badge pbadge1">Phase 01</span>
     <div class="phase-line"></div>
@@ -1042,7 +267,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">fx</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">The 5-Why drill — stop lying about what you really want</div>
         </div>
         <span class="badge b-logic">Core</span>
@@ -1058,10 +283,10 @@
           Real goal: <strong>autonomy and safety.</strong> Now you can stop chasing a salary bump and start asking the real question: what's the fastest, most aggressive path to genuine financial freedom?
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">Your goal, then drill down (5 whys)</div>
         <textarea rows="5" placeholder="I want to... &#10;Why? Because... &#10;Why? Because... &#10;Why? Because... &#10;Why? Because..."></textarea>
-        <div class="field-label" style="margin-top:.75rem">My actual underlying goal is:</div>
+        <div class="field-label field-label--mt">My actual underlying goal is:</div>
         <input type="text" placeholder="The real thing I'm solving for...">
       </div>
     </div>
@@ -1070,7 +295,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">01</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">Make it pass/fail. No participation trophies.</div>
         </div>
         <span class="badge b-logic">Core</span>
@@ -1091,7 +316,7 @@
           <div><strong>You will underestimate how long this takes.</strong> Everyone does. Your optimistic timeline is a fantasy. Find people who've actually done this. Use their timeline, not yours. Then add 50% because you're not them yet.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">Write your goal in binary + time-bound format</div>
         <input type="text" placeholder='e.g. "I will [X] by [date]"'>
       </div>
@@ -1101,7 +326,7 @@
       <div class="card-header">
         <div class="card-icon t-deep">◈</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:#9b7ac8">Deep work</div>
+          <div class="card-tag card-tag--deep">Deep work</div>
           <div class="card-title">The 10/10/10 test — stop thinking small</div>
         </div>
       </div>
@@ -1111,7 +336,7 @@
           The research is clear: humans regret what they <em>didn't do</em> far more than what they did. You recover from failures. You never recover from the haunting knowledge that you were too scared to try.
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="two-col">
           <div>
             <div class="field-label">In 10 months I'll feel...</div>
@@ -1129,7 +354,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">≈</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">The eulogy test — are you even fighting for the right thing?</div>
         </div>
       </div>
@@ -1140,7 +365,7 @@
           <div>This isn't morbid — it's a <strong>wake-up call</strong>. Without this check, you'll spend decades efficiently climbing a mountain you never cared about. That's not discipline — it's sleepwalking.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">5 things I'd want said about me</div>
         <textarea rows="3" placeholder="1. They were... &#10;2. They always... &#10;3. They never..."></textarea>
       </div>
@@ -1150,11 +375,11 @@
       <div class="card-header">
         <div class="card-icon t-tool">✓</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--success)">Clarity checklist</div>
+          <div class="card-tag card-tag--success">Clarity checklist</div>
           <div class="card-title">Don't move forward until every one of these is locked in</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1.25rem;">
+      <div class="card-footer card-footer--tight-bottom">
         <ul class="checklist" id="cl1">
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Complete the 5-Why drill in writing until the real target is on the page</li>
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Rewrite your goal in pass/fail format with a hard deadline</li>
@@ -1169,7 +394,7 @@
 </section>
 
 <!-- ======= PHASE 2: CONSTRAINTS ======= -->
-<section class="phase-section" id="phase2">
+<section class="phase-section" id="phase2" data-phase="2">
   <div class="phase-eyebrow">
     <span class="phase-badge pbadge2">Phase 02</span>
     <div class="phase-line"></div>
@@ -1184,7 +409,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">⊗</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">One bottleneck is strangling everything. Find it.</div>
         </div>
         <span class="badge b-logic">Core</span>
@@ -1204,10 +429,10 @@
           <strong>You're probably wrong about what it is.</strong> Most people blame skills when it's network. Most blame money when it's energy — they have the resources but they're too burned out, too scattered, or too undisciplined to use them. Be ruthlessly honest.
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My primary constraint is</div>
         <input type="text" placeholder="Be specific: e.g. 'I have no network in finance' not just 'network'">
-        <div class="field-label" style="margin-top:.75rem">Evidence that this is actually the bottleneck</div>
+        <div class="field-label field-label--mt">Evidence that this is actually the bottleneck</div>
         <textarea rows="2" placeholder="Because even if I had [X and Y], I'd still be blocked by..."></textarea>
       </div>
     </div>
@@ -1216,7 +441,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">◐</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">Pre-mortem — visualize your failure so you can kill it first</div>
         </div>
         <span class="badge b-psy">Critical</span>
@@ -1235,7 +460,7 @@
           <strong>Relationships:</strong> Avoiding hard conversations. Keeping score. Going silent under stress.
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">Every way I'm going to try to quit — be brutally specific</div>
         <textarea rows="5" placeholder="1. I'll fold when it gets hard in week 3 because...&#10;2. I'll get distracted by [specific thing] and use it as an excuse...&#10;3. I'll rationalize quitting by telling myself...&#10;4. My environment will try to pull me back because...&#10;5. My own weakness will show up as..."></textarea>
       </div>
@@ -1245,7 +470,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">id</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">Identity audit — the invisible chain you refuse to see</div>
         </div>
       </div>
@@ -1255,7 +480,7 @@
           Recognize these? You start strong and mysteriously stop. You "forget" things you planned. You feel weirdly uncomfortable when things go well. You hide from success. That's not bad luck — that's your limiting identity pulling you back to what feels familiar.
         </div>
         The beliefs that are strangling you right now:
-        <div style="margin: .75rem 0;">
+        <div class="metric-table-wrap">
           <div class="metric-row"><span class="metric-key">"I'm not a disciplined person"</span><span class="metric-val">→ Self-imposed death sentence</span></div>
           <div class="metric-row"><span class="metric-key">"People like me don't get that"</span><span class="metric-val">→ Surrendering before the fight</span></div>
           <div class="metric-row"><span class="metric-key">"I'm not the type who..."</span><span class="metric-val">→ You made that up. Destroy it.</span></div>
@@ -1263,7 +488,7 @@
         </div>
         <strong>The fix:</strong> You don't debate the belief. You violate it. Act in direct contradiction, collect the proof, and force your brain to update. Your identity is not a fact — it's a story you've been telling yourself. Write a new one through action.
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">The limiting beliefs you need to confront and destroy</div>
         <textarea rows="3" placeholder='"Deep down I believe I am..."&#10;"The story I tell myself about why I can&#39;t is..."&#10;"The real reason I&#39;ve been holding back is..."'></textarea>
       </div>
@@ -1273,11 +498,11 @@
       <div class="card-header">
         <div class="card-icon t-tool">✓</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--success)">Constraints checklist</div>
+          <div class="card-tag card-tag--success">Constraints checklist</div>
           <div class="card-title">No moving on until these are done. No shortcuts.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1.25rem;">
+      <div class="card-footer card-footer--tight-bottom">
         <ul class="checklist" id="cl2">
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Name the ONE constraint choking your progress in a single sentence</li>
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>List every way you will try to quit and write a kill plan for each</li>
@@ -1292,7 +517,7 @@
 </section>
 
 <!-- ======= PHASE 3: LEVERAGE ======= -->
-<section class="phase-section" id="phase3">
+<section class="phase-section" id="phase3" data-phase="3">
   <div class="phase-eyebrow">
     <span class="phase-badge pbadge3">Phase 03</span>
     <div class="phase-line"></div>
@@ -1307,7 +532,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">↗</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">Asymmetric warfare — small risk, massive upside</div>
         </div>
         <span class="badge b-logic">Core</span>
@@ -1332,7 +557,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">◉</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">Keystone habits — one domino that topples everything</div>
         </div>
       </div>
@@ -1346,10 +571,10 @@
           <div>Ask yourself: <strong>what one habit, if I locked it in with zero exceptions, would make 5 other things automatic?</strong> That's your keystone. Start there. Not at 10 things. One. Dominate it. Then expand.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My keystone habit candidate</div>
         <input type="text" placeholder="If I consistently did this one thing...">
-        <div class="field-label" style="margin-top:.75rem">The 3-5 things it would make easier</div>
+        <div class="field-label field-label--mt">The 3-5 things it would make easier</div>
         <textarea rows="3" placeholder="1. &#10;2. &#10;3."></textarea>
       </div>
     </div>
@@ -1358,7 +583,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">⟳</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">Network leverage — proximity beats grinding alone</div>
         </div>
       </div>
@@ -1376,7 +601,7 @@
           Genuine hunger and thoughtful questions (nobody asks good questions anymore) · Research, writing, or a skill they don't have time for · Connections you have that they don't · Willingness to do the unglamorous work nobody else wants to do · A well-written summary of their ideas they can share
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">3 people who've already solved my problem</div>
         <textarea rows="3" placeholder="1. [Name/type] — who might connect me: [name]&#10;2. &#10;3."></textarea>
       </div>
@@ -1386,13 +611,13 @@
       <div class="card-header">
         <div class="card-icon t-deep">⊞</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:#9b7ac8">Deep work</div>
+          <div class="card-tag card-tag--deep">Deep work</div>
           <div class="card-title">Are you doing tasks or building assets? There's a massive difference.</div>
         </div>
       </div>
       <div class="card-body">
         Most people spend their lives doing things that produce a one-time result and then evaporate. Winners invest in actions that compound — things that keep paying dividends long after the work is done.
-        <div style="margin: .75rem 0;">
+        <div class="metric-table-wrap">
           <div class="metric-row"><span class="metric-key">Linear: doing the task yourself, once</span><span class="metric-val">1× return — then it's gone</span></div>
           <div class="metric-row"><span class="metric-key">Compound: building a skill</span><span class="metric-val">10× over years</span></div>
           <div class="metric-row"><span class="metric-key">Compound: building a system</span><span class="metric-val">Runs without you</span></div>
@@ -1408,15 +633,15 @@
       <div class="card-header">
         <div class="card-icon t-tool">✓</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--success)">Leverage checklist</div>
+          <div class="card-tag card-tag--success">Leverage checklist</div>
           <div class="card-title">Lock these in before advancing. No half-measures.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1.25rem;">
-        <div class="field-label" style="margin-bottom:.75rem">My top 3 high-leverage moves</div>
-        <input type="text" placeholder="Move 1:" style="margin-bottom:6px">
-        <input type="text" placeholder="Move 2:" style="margin-bottom:6px">
-        <input type="text" placeholder="Move 3:" style="margin-bottom:1rem">
+      <div class="card-footer card-footer--tight-bottom card-footer--stacked-inputs">
+        <div class="field-label field-label--mb">My top 3 high-leverage moves</div>
+        <input type="text" placeholder="Move 1:">
+        <input type="text" placeholder="Move 2:">
+        <input type="text" placeholder="Move 3:">
         <ul class="checklist" id="cl3">
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Write down 3 high-leverage moves and delete any that fail the asymmetry test</li>
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Choose one keystone habit and put it on a daily schedule with zero exceptions</li>
@@ -1431,7 +656,7 @@
 </section>
 
 <!-- ======= PHASE 4: SYSTEM ======= -->
-<section class="phase-section" id="phase4">
+<section class="phase-section" id="phase4" data-phase="4">
   <div class="phase-eyebrow">
     <span class="phase-badge pbadge4">Phase 04</span>
     <div class="phase-line"></div>
@@ -1446,7 +671,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">if</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">If-then plans — pre-load your decisions so weakness can't intervene</div>
         </div>
         <span class="badge b-psy">Core</span>
@@ -1463,7 +688,7 @@
         </div>
         The specificity is the weapon. "I'll try to eat better" is a joke. "When I open the fridge, I grab the meal prep container — not whatever's easy" is a rule that survives contact with your laziest self.
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">Write 3 implementation intentions for your goal</div>
         <textarea rows="4" placeholder='When [cue], I will [behavior] in [location].&#10;When [cue], I will [behavior] in [location].&#10;When [cue], I will [behavior] in [location].'></textarea>
       </div>
@@ -1473,14 +698,14 @@
       <div class="card-header">
         <div class="card-icon t-psy">⊕</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">Friction engineering — make the right thing effortless, the wrong thing impossible</div>
         </div>
         <span class="badge b-psy">Core</span>
       </div>
       <div class="card-body">
         You will always take the path of least resistance. Always. Stop fighting that and start using it. Make the destructive option require effort. Make the productive option the default. Rig your environment like a weapon.
-        <div style="margin: .75rem 0;">
+        <div class="metric-table-wrap">
           <div class="metric-row"><span class="metric-key">Want to read more?</span><span class="metric-val">Book on pillow. Phone in another room. Done.</span></div>
           <div class="metric-row"><span class="metric-key">Want to eat clean?</span><span class="metric-val">Don't buy garbage. You can't eat what isn't there.</span></div>
           <div class="metric-row"><span class="metric-key">Want to save money?</span><span class="metric-val">Auto-transfer on payday. You never see it. You never miss it.</span></div>
@@ -1490,7 +715,7 @@
         </div>
         <strong>Never rely on motivation. Never rely on memory. Never rely on "trying harder."</strong> Engineer the environment so the right choice is automatic and the wrong choice takes effort. Your future self is weak. Build a cage that protects them from themselves.
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="two-col">
           <div>
             <div class="field-label">Friction to ADD (bad defaults)</div>
@@ -1508,7 +733,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">▣</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">Time blocking — your to-do list is a fantasy. Your calendar is reality.</div>
         </div>
       </div>
@@ -1529,7 +754,7 @@
           <div><strong>If you don't own your calendar, everyone else will.</strong> Block your deep work before anyone can touch it. Every hour you give away to someone else's priorities is an hour stolen from your mission. Protect it violently.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My peak energy window + deep work block</div>
         <input type="text" placeholder="e.g. Mon–Fri 9–11am: deep work. No exceptions.">
       </div>
@@ -1539,7 +764,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">$</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">Commitment devices — put skin in the game or you'll quit</div>
         </div>
       </div>
@@ -1553,7 +778,7 @@
           <strong>Burn the boats:</strong> Make the weak option impossible. Delete the account. Cancel the subscription. Remove the escape route entirely.
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My commitment device for this goal</div>
         <textarea rows="2" placeholder="e.g. I will tell [person] my weekly target. If I miss it, I owe them $50."></textarea>
       </div>
@@ -1563,11 +788,11 @@
       <div class="card-header">
         <div class="card-icon t-tool">✓</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--success)">System checklist</div>
+          <div class="card-tag card-tag--success">System checklist</div>
           <div class="card-title">Your system is only real when all of these are locked</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1.25rem;">
+      <div class="card-footer card-footer--tight-bottom">
         <ul class="checklist" id="cl4">
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Write 3 if-then rules and put them where you will see them when triggered</li>
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Remove one friction point from the right action and add one to the wrong action</li>
@@ -1583,7 +808,7 @@
 </section>
 
 <!-- ======= PHASE 5: MEASURE ======= -->
-<section class="phase-section" id="phase5">
+<section class="phase-section" id="phase5" data-phase="5">
   <div class="phase-eyebrow">
     <span class="phase-badge pbadge5">Phase 05</span>
     <div class="phase-line"></div>
@@ -1598,24 +823,24 @@
       <div class="card-header">
         <div class="card-icon t-logic">→</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">Stop obsessing over results. Control the inputs.</div>
         </div>
         <span class="badge b-logic">Core</span>
       </div>
       <div class="card-body">
         You can't control outcomes. You can only control the behaviors that produce them. Staring at the scale every day doesn't make you lighter — tracking your meals and workouts does. Most people obsess over results they can't directly change and ignore the daily inputs that actually move the needle.
-        <div style="margin: .75rem 0;">
-          <div class="metric-row"><span class="metric-key" style="color:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:.08em">GOAL DOMAIN</span><span class="metric-val" style="color:var(--danger);font-size:11px">LAGGING (outcome)</span></div>
-          <div class="metric-row"><span class="metric-key">Weight / body comp</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Calories tracked, workouts/week</span></div>
-          <div class="metric-row"><span class="metric-key">Revenue / income</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Outreach sent, proposals made</span></div>
-          <div class="metric-row"><span class="metric-key">Relationship quality</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Intentional conversations/week</span></div>
-          <div class="metric-row"><span class="metric-key">Net worth</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Savings rate %, investments added</span></div>
-          <div class="metric-row"><span class="metric-key">Knowledge / skills</span><span class="metric-val" style="color:var(--success);font-size:11px">→ Hours of deliberate practice</span></div>
+        <div class="metric-table-wrap">
+          <div class="metric-row"><span class="metric-key metric-header-key">GOAL DOMAIN</span><span class="metric-val metric-header-val--danger">LAGGING (outcome)</span></div>
+          <div class="metric-row"><span class="metric-key">Weight / body comp</span><span class="metric-val metric-val--success metric-val--sm">→ Calories tracked, workouts/week</span></div>
+          <div class="metric-row"><span class="metric-key">Revenue / income</span><span class="metric-val metric-val--success metric-val--sm">→ Outreach sent, proposals made</span></div>
+          <div class="metric-row"><span class="metric-key">Relationship quality</span><span class="metric-val metric-val--success metric-val--sm">→ Intentional conversations/week</span></div>
+          <div class="metric-row"><span class="metric-key">Net worth</span><span class="metric-val metric-val--success metric-val--sm">→ Savings rate %, investments added</span></div>
+          <div class="metric-row"><span class="metric-key">Knowledge / skills</span><span class="metric-val metric-val--success metric-val--sm">→ Hours of deliberate practice</span></div>
         </div>
         <strong>Track inputs daily. That's your scoreboard. Review outcomes monthly</strong> to verify the inputs are actually producing results. If they're not, change the inputs. Don't just hope harder.
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="two-col">
           <div>
             <div class="field-label">My leading indicators (daily)</div>
@@ -1633,7 +858,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">⟲</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">The weekly review — 30 minutes of brutal honesty with yourself</div>
         </div>
         <span class="badge b-logic">Core</span>
@@ -1651,10 +876,10 @@
           <span class="comment">// Has your bottleneck shifted? Be honest.</span>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My weekly review — day, time, no excuses</div>
         <input type="text" placeholder="e.g. Every Sunday at 6pm. Blocked. Sacred. Miss it and the whole system breaks.">
-        <div class="field-label" style="margin-top:.75rem">This week's gap — what I said vs. what I did and why</div>
+        <div class="field-label field-label--mt">This week's gap — what I said vs. what I did and why</div>
         <textarea rows="3" placeholder="I committed to... but actually... because the real reason was..."></textarea>
       </div>
     </div>
@@ -1663,7 +888,7 @@
       <div class="card-header">
         <div class="card-icon t-warn">⚠</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--danger)">Watch out</div>
+          <div class="card-tag card-tag--danger">Watch out</div>
           <div class="card-title">Don't game your own metrics — you're only cheating yourself</div>
         </div>
       </div>
@@ -1678,7 +903,7 @@
         </div>
         <strong>The fix:</strong> Track 2–3 metrics across different domains. They keep each other honest. If one metric is winning while others are dying, your system is broken.
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My balance metrics (2–3 domains)</div>
         <textarea rows="3" placeholder="Domain 1 (work): &#10;Domain 2 (health): &#10;Domain 3 (relationships):"></textarea>
       </div>
@@ -1688,11 +913,11 @@
       <div class="card-header">
         <div class="card-icon t-tool">✓</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--success)">Measure checklist</div>
+          <div class="card-tag card-tag--success">Measure checklist</div>
           <div class="card-title">You don't get to advance until the scoreboard is real</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1.25rem;">
+      <div class="card-footer card-footer--tight-bottom">
         <ul class="checklist" id="cl5">
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Choose 2-3 daily input metrics and track them somewhere visible</li>
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Put a weekly review on your calendar and protect the time</li>
@@ -1707,7 +932,7 @@
 </section>
 
 <!-- ======= PHASE 6: ITERATE ======= -->
-<section class="phase-section" id="phase6">
+<section class="phase-section" id="phase6" data-phase="6">
   <div class="phase-eyebrow">
     <span class="phase-badge pbadge6">Phase 06</span>
     <div class="phase-line"></div>
@@ -1722,7 +947,7 @@
       <div class="card-header">
         <div class="card-icon t-logic">⟳</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--info)">Logic</div>
+          <div class="card-tag card-tag--info">Logic</div>
           <div class="card-title">Monthly recalibration — ruthless honesty check</div>
         </div>
         <span class="badge b-logic">Core</span>
@@ -1742,7 +967,7 @@
           <div><strong>Don't confuse stubbornness with discipline.</strong> Staying on a dead-end path because you've already invested time is not toughness — it's stupidity. Your commitment is to the outcome, not the original plan. Pivoting when the data demands it is strength. Ignoring reality to protect your ego is how people waste years.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My monthly recalibration date</div>
         <input type="text" placeholder="e.g. First Sunday of every month, morning">
       </div>
@@ -1752,7 +977,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">▷</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">Motivation is a lie. Action comes first. Always.</div>
         </div>
       </div>
@@ -1778,7 +1003,7 @@
       <div class="card-header">
         <div class="card-icon t-psy">∞</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--warn)">Psychology</div>
+          <div class="card-tag card-tag--warn">Psychology</div>
           <div class="card-title">Become the person. Don't just do the things.</div>
         </div>
       </div>
@@ -1797,7 +1022,7 @@
           <div>Every decision is a vote. Before every choice, ask yourself: <strong>"What would the person I'm becoming do right now?"</strong> Then do exactly that. No debate. No hesitation. Act as if you're already that person and your brain will close the gap.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My new identity statement</div>
         <input type="text" placeholder='e.g. "I am someone who builds wealth steadily and deliberately"'>
       </div>
@@ -1807,7 +1032,7 @@
       <div class="card-header">
         <div class="card-icon t-warn">▬</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--danger)">Watch out</div>
+          <div class="card-tag card-tag--danger">Watch out</div>
           <div class="card-title">The plateau — this is where most people quit. Don't be most people.</div>
         </div>
       </div>
@@ -1816,7 +1041,7 @@
         <div class="insight pb5">
           <strong>The plateau is a signal to increase the challenge,</strong> not to surrender. Your body, your mind, your business — they all adapt to repeated stimulus. When things stall, it means you need more weight, a different angle, a harder push. Not less effort.
         </div>
-        <div style="margin: .75rem 0;">
+        <div class="metric-table-wrap">
           <div class="metric-row"><span class="metric-key">Fitness plateau</span><span class="metric-val">→ Go heavier. Change the stimulus. Suffer more.</span></div>
           <div class="metric-row"><span class="metric-key">Skill plateau</span><span class="metric-val">→ Deliberate practice. Get a coach. Get humbled.</span></div>
           <div class="metric-row"><span class="metric-key">Revenue plateau</span><span class="metric-val">→ New channel. New offer. New market. Stop repeating.</span></div>
@@ -1830,7 +1055,7 @@
       <div class="card-header">
         <div class="card-icon t-deep">◈</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:#9b7ac8">Deep work</div>
+          <div class="card-tag card-tag--deep">Deep work</div>
           <div class="card-title">The annual review — full audit. No mercy.</div>
         </div>
       </div>
@@ -1852,7 +1077,7 @@
           <div>Do this somewhere you've never been. Same room, same chair, same couch = same thinking. <strong>You need a new environment to see yourself clearly.</strong> Get out. Go somewhere uncomfortable. That's where the truth lives.</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1rem;">
+      <div class="card-footer">
         <div class="field-label">My annual review date + location</div>
         <input type="text" placeholder="e.g. Dec 28th, a quiet café I don't normally go to">
       </div>
@@ -1862,11 +1087,11 @@
       <div class="card-header">
         <div class="card-icon t-tool">✓</div>
         <div class="card-meta">
-          <div class="card-tag" style="color:var(--success)">Final checklist</div>
+          <div class="card-tag card-tag--success">Final checklist</div>
           <div class="card-title">The machine is only live when every single one of these is true</div>
         </div>
       </div>
-      <div style="padding: 0 1.25rem 1.25rem;">
+      <div class="card-footer card-footer--tight-bottom">
         <ul class="checklist" id="cl6">
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Write your pass/fail goal and hard deadline where you will see them daily (Phase 1)</li>
           <li onclick="toggle(this)"><div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-5"/></svg></div>Write your bottleneck and schedule direct work against it this week (Phase 2)</li>

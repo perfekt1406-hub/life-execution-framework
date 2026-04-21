@@ -21,6 +21,7 @@
       "main.js",
       "preload.js",
       "life-framework.html",
+      "styles/**",
       "package.json",
       "build/icons/*"
     ],
