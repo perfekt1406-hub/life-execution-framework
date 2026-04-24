@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<!--
+  Temporary theme demo: "Field manual" — dense instructional document metaphor for the UI rework direction.
+  Open this file in a browser. Safe to delete once no longer needed.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme demo — Field manual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #d4cfc4;
+      --ink: #1a1814;
+      --ink-muted: #3d3a35;
+      --rule: #a39e91;
+      --warn-bg: #2a2620;
+      --warn-text: #e8e2d9;
+      --stamp: #6b1414;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0e0c;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
+      border: 1px solid #8a8579;
+    }
+    .page-inner {
+      padding: 28px 32px 36px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.65;
+    }
+    .masthead {
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .masthead-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .doc-id {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+    .stamp {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--stamp);
+      border: 2px solid var(--stamp);
+      padding: 4px 10px;
+      transform: rotate(-2deg);
+    }
+    .title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 8px;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      margin-top: 6px;
+      color: var(--ink-muted);
+      font-size: 12px;
+    }
+    h2 {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin: 22px 0 10px;
+      color: var(--ink-muted);
+      border-left: 3px solid var(--ink);
+      padding-left: 10px;
+    }
+    p { margin-bottom: 12px; }
+    .mono-block {
+      background: rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--rule);
+      padding: 12px 14px;
+      margin: 14px 0;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .warning {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border: 1px solid #444;
+      padding: 12px 14px;
+      margin: 16px 0;
+    }
+    .warning strong {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      color: #f0a8a8;
+    }
+    ol.steps {
+      margin: 12px 0 12px 1.25rem;
+      padding: 0;
+    }
+    ol.steps li { margin-bottom: 8px; padding-left: 4px; }
+    .checkline {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin: 8px 0;
+      padding: 6px 0;
+      border-bottom: 1px dotted var(--rule);
+    }
+    .checkline:last-of-type { border-bottom: none; }
+    .box {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--ink);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .footer-note {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+      font-size: 11px;
+      color: var(--ink-muted);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <article class="page">
+    <div class="page-inner">
+      <header class="masthead">
+        <div class="masthead-top">
+          <div>
+            <div class="doc-id">TM-LXF-00 · Rev. demo</div>
+            <h1 class="title">Instruction: Daily non-negotiable</h1>
+            <p class="subtitle">Field manual sample · not the real Life Execution Framework app</p>
+          </div>
+          <div class="stamp">UNCLASS<br>DEMO</div>
+        </div>
+      </header>
+
+      <h2>1 · Purpose</h2>
+      <p>
+        This page shows the “field manual” direction: it looks like <strong>issued instructions</strong> — numbered sections,
+        monospace body, boxed procedures, and a <strong>paper page on a dark desk</strong>. The emotional job is “orders you follow,”
+        not “article you browse.”
+      </p>
+
+      <div class="mono-block">// Quick reference
+WEEK 1–2: One commitment. Zero excuses.
+WEEK 3–4: Add load. Never miss twice.</div>
+
+      <h2>2 · Execution steps</h2>
+      <ol class="steps">
+        <li>Write the commitment in pass/fail form.</li>
+        <li>Run it before variable inputs (phone, email, meetings).</li>
+        <li>If you miss once: recovery action same day, no drama.</li>
+      </ol>
+
+      <div class="warning">
+        <strong>Warning</strong>
+        Planning without execution is indistinguishable from cowardice. This block is the manual equivalent of a red-bordered warning in a maintenance guide — impossible to mistake for body copy.
+      </div>
+
+      <h2>3 · Compliance checklist</h2>
+      <div class="checkline"><span class="box" aria-hidden="true"></span><span>I accept that discipline is trained, not granted.</span></div>
+      <div class="checkline"><span class="box" aria-hidden="true"></span><span>I have chosen one daily action and a recovery action.</span></div>
+
+      <p class="footer-note">
+        Delete this folder when done. “Field manual” = dense instructional typography, rulings, stamped headers — not a dashboard of tiles.
+      </p>
+    </div>
+  </article>
+</body>
+</html>

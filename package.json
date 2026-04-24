@@ -1,0 +1,58 @@
+{
+  "name": "life-execution-framework",
+  "version": "1.0.0",
+  "packageManager": "pnpm@9.15.4",
+  "description": "A brutally honest life execution workbook — Electron desktop app",
+  "main": "main.js",
+  "scripts": {
+    "start": "unset ELECTRON_RUN_AS_NODE && electron --no-sandbox .",
+    "dist": "bash build/scripts/clean-releases.sh --all && electron-builder && bash build/scripts/publish-releases.sh",
+    "dist:linux": "bash build/scripts/clean-releases.sh --linux && electron-builder --linux && bash build/scripts/patch-deb.sh && bash build/scripts/publish-releases.sh",
+    "dist:mac": "bash build/scripts/clean-releases.sh --mac && electron-builder --mac && bash build/scripts/publish-releases.sh",
+    "dist:win": "bash build/scripts/clean-releases.sh --win && electron-builder --win && bash build/scripts/publish-releases.sh",
+    "dist:linux:win": "pnpm run dist:linux && pnpm run dist:win",
+    "dist:linux:mac": "pnpm run dist:linux && pnpm run dist:mac",
+    "dist:mac:win": "pnpm run dist:mac && pnpm run dist:win",
+    "dist:linux:mac:win": "pnpm run dist:linux && pnpm run dist:mac && pnpm run dist:win"
+  },
+  "build": {
+    "appId": "com.life-framework.app",
+    "productName": "Life Execution Framework",
+    "files": [
+      "main.js",
+      "preload.js",
+      "life-framework.html",
+      "styles/**",
+      "package.json",
+      "build/icons/*"
+    ],
+    "icon": "build/icons/icon",
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "maintainer": "Life Framework <noreply@life-framework.local>",
+      "icon": "build/icons/icon.png"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.lifestyle",
+      "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "icon": "build/icons/icon.ico",
+      "target": [
+        { "target": "nsis",  "arch": ["x64"] },
+        { "target": "zip",   "arch": ["x64"] }
+      ]
+    }
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,13 @@
+# Life Execution Framework — keep dependencies and build output out of git.
+node_modules/
+dist/
+release/
+out/
+.pnpm-store/
+.env
+.env.local
+.DS_Store
+*.log
+# Built installers — ship via GitHub Releases, not the repo
+releases/*
+!releases/.gitkeep
